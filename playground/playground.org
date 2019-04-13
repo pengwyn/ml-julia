@@ -1,0 +1,103 @@
+#+SETUPFILE: https://fniessen.github.io/org-html-themes/setup/theme-readtheorg.setup
+
+#+BEGIN_SRC jupyter-julia :exports none
+using Revise
+using Plots
+pyplot()
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+: Plots.PyPlotBackend()
+:END:
+
+#+BEGIN_SRC jupyter-julia :exports code 
+union!(LOAD_PATH, ["../src"])
+using Data
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+: ┌ Info: Recompiling stale cache file /home/pengwyn/.julia/compiled/v1.1/Data.ji for Data [top-level]
+: └ @ Base loading.jl:1184
+:END:
+
+* Donut
+
+#+BEGIN_SRC jupyter-julia :file images/donut.png
+data = makeDonut()
+container = DataContainer(data)
+plot(container)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+[[file:images/donut.png]]
+:END:
+
+* Cloud
+#+BEGIN_SRC jupyter-julia :file images/cloud.png
+data = makeCloud()
+container = DataContainer(data)
+plot(container)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+[[file:images/cloud.png]]
+:END:
+
+* Spiral
+
+#+BEGIN_SRC jupyter-julia :file images/spiral.png
+data = makeSpiral(4, n_samples=5000)
+container = DataContainer(data)
+plot(container)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+[[file:images/spiral.png]]
+:END:
+
+* Xor
+
+** 2D
+  
+  
+#+BEGIN_SRC jupyter-julia :file images/xor.png
+data = makeXor(n_samples=1000)
+container = DataContainer(data)
+plot(container)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+[[file:images/xor.png]]
+:END:
+
+** 3D
+   
+#+BEGIN_SRC jupyter-julia :file images/xor_3d.png
+data = makeXor(3, n_samples=1000)
+container = DataContainer(data)
+plot(container)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+[[file:images/xor_3d.png]]
+:END:
+
+* Moons
+  
+#+BEGIN_SRC jupyter-julia :file images/moons.png
+data = makeMoons()
+container = DataContainer(data)
+plot(container)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+[[file:images/moons.png]]
+:END:
