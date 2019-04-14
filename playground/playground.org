@@ -1,26 +1,19 @@
 #+SETUPFILE: https://fniessen.github.io/org-html-themes/setup/theme-readtheorg.setup
+#+OPTIONS: toc:nil
 
-#+BEGIN_SRC jupyter-julia :exports none
+This is a series of tests for the generation of datasets.
+
+#+BEGIN_SRC jupyter-julia :results none
 using Revise
 using Plots
 pyplot()
+default(legend=false)
 #+END_SRC
 
-#+RESULTS:
-:RESULTS:
-: Plots.PyPlotBackend()
-:END:
-
-#+BEGIN_SRC jupyter-julia :exports code 
+#+BEGIN_SRC jupyter-julia :results none
 union!(LOAD_PATH, ["../src"])
 using Data
 #+END_SRC
-
-#+RESULTS:
-:RESULTS:
-: ┌ Info: Recompiling stale cache file /home/pengwyn/.julia/compiled/v1.1/Data.ji for Data [top-level]
-: └ @ Base loading.jl:1184
-:END:
 
 * Donut
 
