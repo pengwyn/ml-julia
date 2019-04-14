@@ -1,11 +1,14 @@
 module Data
 
-# module DataGenerator
 
 using Distributions, Random
 
-using ArgCheck, Parameters
+using ArgCheck
 using DataFrames 
+
+####################################
+# * Data generators
+#----------------------------------
 
 randomRadius(radius, n_samples, noise) = rand(Normal(radius, noise), n_samples)
 
@@ -57,34 +60,6 @@ function makeCloud(n_targets=2 ; n_features=2, kwds...)
 end
 
 function makeCloud(centres, noises ; n_samples=100, n_features)
-        """
-        Generates Gaussian clouds of dimension n_features
-
-        A simple toy dataset to visualize clustering and classification
-        algorithms.
-
-        Parameters
-        ----------
-        n_samples : int, optional (default=100)
-            The total number of points generated.
-        n_targets : int, optional (default=2)
-            The number of target classes (spiral arms)
-        noise : double or None (default=None)
-            Standard deviation of Gaussian noise added to the data.
-        n_features : int, optional (default=2)
-            Dimension of each cloud
-        random_state : int, RandomState instance or None (default)
-            Determines random number generation for dataset shuffling and noise.
-            Pass an int for reproducible output across multiple function calls.
-
-        Returns
-        -------
-        X : array of shape [n_samples, n_features]
-            The generated samples.
-        y : array of shape [n_samples]
-            The integer labels (0, 1, ..., targets) for class membership of each sample.
-        """
-
     @argcheck length(centres) == length(noises)
     n_targets = length(centres)
 
@@ -163,8 +138,13 @@ function makeMoons(; n_samples=100, noise=0.05)
     return X,y
 end
 
+
+################################
+# * DataContainer
+#------------------------------
+
 export DataContainer
-@with_kw mutable struct DataContainer
+Base.@kwdef mutable struct DataContainer
     data
     data_df::DataFrame = storeDataAsDF(data)
 
@@ -207,28 +187,8 @@ function shuffle!(self::DataContainer)
     self.shuffled = true
 end
 
+"""Split the dataset self.data_df into training and test sets"""
 function trainTestSplit(self::DataContainer, frac=0.8)
-        """Split the dataset self.data_df into training and test sets
-
-
-        Parameters
-        ----------
-        frac : float, optional (default=0.8)
-            Fraction of the dataset assigned to the training set (with the remaining
-            (1 - frac) assigned to the test set
-
-        Returns
-        -------
-        X_train : array of shape [frac*n_samples, n_features]
-            The training samples.
-        y_train : array of shape [n_samples, 1]
-            The training targets.
-        X_test : array of shape [(1 - frac)*n_samples, n_features]
-            The test samples.
-        y_test : array of shape [n_samples, 1]
-            The test targets
-        """
-
     n_train = round(Int, self.n_samples * frac)
 
     X,y = extractArrays(self)
@@ -257,22 +217,23 @@ using RecipesBase
     self.data_df[:,1:end-1] |> Matrix |> eachcol |> x -> tuple(x...)
 end
 
-    # def scale(self, X=None, inplace=True):
-    #     """
-    #     Scale the input to have mean=0 and sd=1 for each feature
+export scale
+scale(self::DataContainer, X=self.data[1]) = scale!(self, similar(X), X)
 
-    #     Parameters
-    #     ----------
-    #     X : array (optional)
-    #         Optional array to scale. If None (default) self.data_df is scaled
-    #     inplace : Boolean (optional, default=True)
-    #         Boolean argument to determine whether the scaled array should replace the original
+export scale!
+"""This is the equivalent of "inplace=true". """
+function scale!(self::DataContainer, X_out=self.data[1], X=X_out)
+    for feature_i = axes(X,2)
+        arr = X[:,feature_i]
 
-    #     Returns
-    #     -------
-    #     X_scaled : array
-    #         Scaled array where each feature has mean=0 and sd=1
-    #     """
+        the_mean = mean(arr)
+        the_sd = std(arr)
+
+        @. X_out[:,feature_i] = (arr - the_mean) / the_sd
+    end
+
+    return X_out
+end
 
     # def back_transform(self, X_scaled=None, scales=None):
     #     """
@@ -337,11 +298,5 @@ end
     #     X : array of shape [n_samples, n_features + 1]
     #         The generated samples plus a new column of white noise.
     #     """
-
-# end
-
-# using .DataGenerator
-
-# Stuff stolen from my library
 
 end
