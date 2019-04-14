@@ -17,33 +17,45 @@ using Data
 
 * Donut
 
-#+BEGIN_SRC jupyter-julia :file images/donut.png
+  #+BEGIN_SRC jupyter-julia :file images/donut.png
 data = makeDonut()
 container = DataContainer(data)
 plot(container)
-#+END_SRC
+  #+END_SRC
 
-#+RESULTS:
-:RESULTS:
+  #+RESULTS:
+  :RESULTS:
 [[file:images/donut.png]]
-:END:
+  :END:
+
+  #+BEGIN_SRC jupyter-julia :results none
+  andReversed(x) = [x ; reverse(x)]
+  anim = @animate for r2 = andReversed(0:0.1:5)
+      data = makeDonut([1.,r2,4.], noise=0.2, n_samples=1000)
+      container = DataContainer(data)
+      plot(container, xlim=[-6,6], ylim=[-6,6])
+  end 
+  gif(anim, "images/donut.gif", fps=10)
+  #+END_SRC
+
+  [[file:images/donut.gif]]
 
 * Cloud
-#+BEGIN_SRC jupyter-julia :file images/cloud.png
-data = makeCloud()
+  #+BEGIN_SRC jupyter-julia :file images/cloud.png
+data = makeCloud(5)
 container = DataContainer(data)
 plot(container)
-#+END_SRC
+  #+END_SRC
 
-#+RESULTS:
-:RESULTS:
+  #+RESULTS:
+  :RESULTS:
 [[file:images/cloud.png]]
-:END:
+  :END:
 
 * Spiral
 
 #+BEGIN_SRC jupyter-julia :file images/spiral.png
-data = makeSpiral(4, n_samples=5000)
+data = makeSpiral(2, n_samples=5000)
 container = DataContainer(data)
 plot(container)
 #+END_SRC
@@ -52,6 +64,18 @@ plot(container)
 :RESULTS:
 [[file:images/spiral.png]]
 :END:
+
+#+BEGIN_SRC jupyter-julia :results none
+  anim = @animate for p = LinRange(0,2π,101)
+        phases = p*[1, 2, 3]
+        data = makeSpiral(phases, n_samples=5000)
+        container = DataContainer(data)
+        plot(container, xlims=[-2.5, 2.5], ylims=[-2.5,2.5])
+    end 
+    gif(anim, "images/spiral.gif", fps=10)
+#+END_SRC
+
+[[file:images/spiral.gif]]
 
 * Xor
 

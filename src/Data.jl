@@ -25,9 +25,9 @@ function distributeSamples(n_samples, n_targets)
 end
 
 export makeDonut
-makeDonut(n_samples::Int=100, n_targets=2, noise=0.) = makeDonut(1:n_targets, n_samples, n_targets, noise)
-function makeDonut(radii::AbstractVector, n_samples=100, n_targets=2, noise=0.)
-    @argcheck length(radii) == n_targets
+makeDonut(n_targets::Int=2 ; kwds...) = makeDonut(1:n_targets ; kwds...)
+function makeDonut(radii::AbstractVector; n_samples=100, noise=0.)
+    n_targets = length(radii)
 
     target_samples,y = distributeSamples(n_samples, n_targets)
 
@@ -100,11 +100,12 @@ end
         
         
 export makeSpiral
-function makeSpiral(n_targets=2 ; n_samples=100, noise=0.05, inner_radius=0, outer_radius=2)
+makeSpiral(n_targets::Int=2 ; kwds...) = makeSpiral(LinRange(0, 2π, n_targets+1)[1:end-1] ; kwds...)
+function makeSpiral(phases::AbstractVector ; n_samples=100, noise=0.05, inner_radius=0, outer_radius=2)
     # n_features is fixed to 2 here.
+    n_targets = length(phases)
     target_samples,y = distributeSamples(n_samples, n_targets)
 
-    phases = LinRange(0, 2π, n_targets+1)[1:end-1]
 
     X = map(target_samples,phases) do target_n,phase
         # Parameteric with variable p

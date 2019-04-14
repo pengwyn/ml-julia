@@ -1,19 +1,13 @@
+This is a series of tests for the generation of datasets.
 
-# Table of Contents
-
-1.  [Donut](#org4f12530)
-2.  [Cloud](#org15d1cf1)
-3.  [Spiral](#org2dfa5c5)
-4.  [Xor](#org6796fcf)
-    1.  [2D](#org4f74a5e)
-    2.  [3D](#org5c9caa7)
-5.  [Moons](#orgd145a6b)
+    using Revise
+    using Plots
+    pyplot()
+    default(legend=false)
 
     union!(LOAD_PATH, ["../src"])
     using Data
 
-
-<a id="org4f12530"></a>
 
 # Donut
 
@@ -23,35 +17,47 @@
 
 ![img](images/donut.png)
 
+    andReversed(x) = [x ; reverse(x)]
+    anim = @animate for r2 = andReversed(0:0.1:5)
+        data = makeDonut([1.,r2,4.], noise=0.2, n_samples=1000)
+        container = DataContainer(data)
+        plot(container, xlim=[-6,6], ylim=[-6,6])
+    end 
+    gif(anim, "images/donut.gif", fps=10)
 
-<a id="org15d1cf1"></a>
+![img](images/donut.gif)
+
 
 # Cloud
 
-    data = makeCloud()
+    data = makeCloud(5)
     container = DataContainer(data)
     plot(container)
 
 ![img](images/cloud.png)
 
 
-<a id="org2dfa5c5"></a>
-
 # Spiral
 
-    data = makeSpiral(4, n_samples=5000)
+    data = makeSpiral(2, n_samples=5000)
     container = DataContainer(data)
     plot(container)
 
 ![img](images/spiral.png)
 
+    anim = @animate for p = LinRange(0,2π,101)
+          phases = p*[1, 2, 3]
+          data = makeSpiral(phases, n_samples=5000)
+          container = DataContainer(data)
+          plot(container, xlims=[-2.5, 2.5], ylims=[-2.5,2.5])
+      end 
+      gif(anim, "images/spiral.gif", fps=10)
 
-<a id="org6796fcf"></a>
+![img](images/spiral.gif)
+
 
 # Xor
 
-
-<a id="org4f74a5e"></a>
 
 ## 2D
 
@@ -62,8 +68,6 @@
 ![img](images/xor.png)
 
 
-<a id="org5c9caa7"></a>
-
 ## 3D
 
     data = makeXor(3, n_samples=1000)
@@ -72,8 +76,6 @@
 
 ![img](images/xor_3d.png)
 
-
-<a id="orgd145a6b"></a>
 
 # Moons
 
