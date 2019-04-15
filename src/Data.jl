@@ -176,9 +176,10 @@ function storeDataAsDF(data)
     df = DataFrame(; columns..., y=y)
 end
 
+export extractArrays
 function extractArrays(self::DataContainer)
-    X = df[:, 1:self.n_features]
-    y = df[:, end]
+    X = self.data_df[:, 1:self.n_features] |> Matrix
+    y = self.data_df[:, end] |> Vector
     return X, y
 end
 

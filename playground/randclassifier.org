@@ -1,0 +1,76 @@
+#+OPTIONS: toc:nil
+
+Random weights for classification.
+
+* Setup
+  
+#+BEGIN_SRC jupyter-julia :results silent 
+using Revise
+using Plots
+pyplot()
+
+push!(LOAD_PATH, "../src")
+using Data
+using LogBin
+#+END_SRC
+
+** Generic tester
+
+#+BEGIN_SRC jupyter-julia :results silent
+function TestData(data)
+    cont = DataContainer(data)
+    X,y = extractArrays(cont)
+
+    class = LogisticClassifierBinary()
+    initialiseWeights!(class, X)
+
+    plotFit(class, X, y)
+end
+#+END_SRC
+
+* Sprial
+
+  #+BEGIN_SRC jupyter-julia :file images/rand_weights_Spiral.png
+TestData(makeSpiral(n_samples=1000))
+  #+END_SRC
+
+  #+RESULTS:
+  :RESULTS:
+[[file:images/rand_weights_Spiral.png]]
+  :END:
+
+  #+BEGIN_SRC jupyter-julia :file images/rand_weights_Cloud.png
+TestData(makeCloud())
+  #+END_SRC
+
+  #+RESULTS:
+  :RESULTS:
+[[file:images/rand_weights_Cloud.png]]
+  :END:
+
+  #+BEGIN_SRC jupyter-julia :file images/rand_weights_Donut.png
+TestData(makeDonut())
+  #+END_SRC
+
+  #+RESULTS:
+  :RESULTS:
+[[file:images/rand_weights_Donut.png]]
+  :END:
+
+  #+BEGIN_SRC jupyter-julia :file images/rand_weights_Xor.png
+TestData(makeXor())
+  #+END_SRC
+
+  #+RESULTS:
+  :RESULTS:
+[[file:images/rand_weights_Xor.png]]
+  :END:
+
+  #+BEGIN_SRC jupyter-julia :file images/rand_weights_Moons.png
+TestData(makeMoons())
+  #+END_SRC
+
+  #+RESULTS:
+  :RESULTS:
+[[file:images/rand_weights_Moons.png]]
+  :END:

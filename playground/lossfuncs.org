@@ -1,0 +1,32 @@
+#+OPTIONS: toc:nil
+
+A comparison of the different activation functions and their derivatives.
+
+#+BEGIN_SRC jupyter-julia :results silent
+using Revise
+using Plots
+pyplot()
+
+push!(LOAD_PATH, "../src")
+using MLBase: ACTIVATIONS, DERIVATIVES
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+:END:
+
+#+BEGIN_SRC jupyter-julia :file images/loss_funcs.png
+  func_names = collect(keys(ACTIVATIONS))
+
+  plist = map(func_names) do name
+      plot(ACTIVATIONS[name], -1, 1, label=name)
+      plot!(DERIVATIVES[name], -1, 1, label="deriv")
+  end
+
+  plot(plist...)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+[[file:images/loss_funcs.png]]
+:END:
