@@ -31,17 +31,29 @@ Random weights for classification.
 
 ![img](images/rand_weights_Spiral.png)
 
+
+# Cloud
+
     TestData(makeCloud())
 
 ![img](images/rand_weights_Cloud.png)
+
+
+# Donut
 
     TestData(makeDonut())
 
 ![img](images/rand_weights_Donut.png)
 
+
+# Xor
+
     TestData(makeXor())
 
 ![img](images/rand_weights_Xor.png)
+
+
+# Moons
 
     TestData(makeMoons())
 
