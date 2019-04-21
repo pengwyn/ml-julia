@@ -1,0 +1,134 @@
+#+OPTIONS: toc:nil
+
+A logistic classifier that now attempts to learn its weights
+
+* Setup
+  
+#+BEGIN_SRC jupyter-julia :results silent 
+using Revise
+using Plots
+pyplot()
+
+push!(LOAD_PATH, "../src")
+using Data
+using LogBin
+#+END_SRC
+
+** Generic tester
+
+#+BEGIN_SRC jupyter-julia :results silent
+function TestData(data)
+    cont = DataContainer(data)
+    X,y = extractArrays(cont)
+
+    class = LogisticClassifierBinary(max_iter=10000)
+    initialiseWeights!(class, X)
+
+    X_train,y_train, X_test,y_test = trainTestSplit(cont)
+
+    fit!(class, X_train, y_train)
+
+    plot(plotFit(class, X_train, y_train),
+         plotFit(class, X_test, y_test))
+end
+#+END_SRC
+
+* Tests
+
+  Each test has an image (left-side) for the training data and its application
+  to the test data (right-side).
+
+** Blob
+
+   #+BEGIN_SRC jupyter-julia :file images/logclassifier_cloud.png
+   TestData(makeCloud())
+   #+END_SRC
+
+   #+RESULTS:
+   :RESULTS:
+[[file:images/logclassifier_cloud.png]]
+   :END:
+  
+** Spiral
+   #+BEGIN_SRC jupyter-julia :file images/logclassifier_sprial.png
+ TestData(makeSpiral())
+   #+END_SRC
+
+   #+RESULTS:
+   :RESULTS:
+[[file:images/logclassifier_sprial.png]]
+   :END:
+
+** Xor
+   #+BEGIN_SRC jupyter-julia :file images/logclassifier_xor.png
+ TestData(makeXor())
+   #+END_SRC
+
+   #+RESULTS:
+   :RESULTS:
+[[file:images/logclassifier_xor.png]]
+   :END:
+
+** Moons
+  
+   #+BEGIN_SRC jupyter-julia :file images/logclassifier_moons.png
+ TestData(makeMoons())
+   #+END_SRC
+
+   #+RESULTS:
+   :RESULTS:
+[[file:images/logclassifier_moons.png]]
+   :END:
+
+* Old testing ground
+
+  #+BEGIN_SRC jupyter-julia
+    using Logging
+    debug_logger = SimpleLogger(stderr, Logging.Debug)
+    # global_logger(logger)
+  #+END_SRC
+
+  #+RESULTS:
+  :RESULTS:
+: SimpleLogger(IJulia.IJuliaStdio{Base.PipeEndpoint}(IOContext(Base.PipeEndpoint(RawFD(0x00000030) open, 0 bytes waiting))), Debug, Dict{Any,Int64}())
+  :END:
+
+#+BEGIN_SRC jupyter-julia
+  data = makeCloud()
+  cont = DataContainer(data)
+  X,y = extractArrays(cont)
+  X_train,y_train, X_test,y_test = trainTestSplit(cont)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+: '((0.887746 0.910662; -0.115007 -0.413009; … ; 0.840862 0.918078; -0.135662 -0.363429)  (1  0  0  1  1  1  0  0  0  0  …  0  0  0  1  1  0  1  1  1  0)  (0.89045 0.916359; -0.153738 -0.446778; … ; 0.839763 1.00243; -0.124988 -0.407226)  (1  0  1  1  0  1  1  0  1  0  0  0  1  1  0  1  1  1  1  0))
+:END:
+
+#+BEGIN_SRC jupyter-julia
+  class = LogisticClassifierBinary()
+  #class.max_iter = 5
+  #initialiseWeights!(class, X)
+  class.w = [0,1]
+  class.b = 0
+
+  plotFit(class, X, y)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+[[file:./.ob-jupyter/51218cc7ff22705ddc165beb4691fa7d67c64d5c.png]]
+:END:
+
+#+BEGIN_SRC jupyter-julia
+    class.max_iter = 10000
+    fit!(class, X_train, y_train)
+
+    plotFit(class, X, y)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+[[file:./.ob-jupyter/4554a445131cac1c186bbcf5b4ee61abf84209db.png]]
+:END:
+

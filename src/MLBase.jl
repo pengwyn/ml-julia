@@ -9,12 +9,10 @@ using ArgCheck
 
 # Note: all of these functions are defined for single element only as per julia style
 
+export logistic, relu, softmax
 # identity is already a function in Base
-
 logistic(x) = 1 / (1 + exp(-x))
-
 # tanh is already a function
-
 relu(x) = x > 0 ? x : zero(x)
 
 # Not sure about this - I think the input is not what is described in the problem.
@@ -38,19 +36,20 @@ DERIVATIVES = Dict(key => x -> ForwardDiff.derivative(func, x)
                    for (key,func) in ACTIVATIONS)
 
 
-# Convenience function for 2-arg vectorisation
-# prod here is always (-y_true * y_pred)
+export squaredLoss, logLoss, binaryLogLoss
 
-loss(func, prod) = mean(func, prod)
+squaredLoss(y_true, y_pred) = (1 - -y_true*y_pred)^2
+logLoss(y_true, y_pred) = 1/log(2) * log(1 + exp(-y_true*y_pred))
+binaryLogLoss(y_true, y_pred) = -(y_true*log(y_pred) + (1-y_true)*log(1 - y_pred))
 
-squaredLoss(prod) = (1 - prod)^2
-logLoss(prod) = 1/log(2) * log(1 + exp(prod))
-binaryLogLoss(prod) = sign(prod)
-
+loss(func, args...) = mean(func.(args...))
 for func in [:squaredLoss, :logLoss, :binaryLogLoss]
-    @eval $func(y_true,y_pred) = loss($func, -y_true*y_pred)
+    @eval $func(y_true::AbstractVector, y_pred::AbstractVector) = loss($func, y_true, y_pred)
 end
 
+export ∇y_binaryLogLoss
+
+∇y_binaryLogLoss(y_true::AbstractVector, y_pred::AbstractVector) = @. 1/length(y_true) * (y_pred - y_true) / (y_pred * (1 - y_pred))
 
 # Really these don't belong to anything
 correct(y_true, y_pred) = y_true .== y_pred
@@ -65,12 +64,19 @@ score(y_true, y_pred) = mean(y_true .== y_pred)
 export ClassifierMixin
 abstract type ClassifierMixin end
 
-export initialiseWeights!
-function initialiseWeights! end
-export forwardPass
-function forwardPass end
-export predict
-function predict end
+macro createVirtualFunc(sym)
+    expr = quote
+        export $sym
+        function $sym end
+    end
+    esc(expr)
+end
+
+@createVirtualFunc initialiseWeights!
+@createVirtualFunc forwardPass
+@createVirtualFunc predict
+@createVirtualFunc fit!
+@createVirtualFunc lossFunc
 
 export plotFit
 function plotFit(self::ClassifierMixin, X, y_true ; full_grid=true)
@@ -79,7 +85,9 @@ function plotFit(self::ClassifierMixin, X, y_true ; full_grid=true)
 
     y_pred = predict(self, X)
 
-    s = score(y_pred, y_true)
+    # s = score(y_pred, y_true)
+    s = lossFunc(self, X, y_true)
+    s = round(s, digits=3)
 		
     xlim = extrema(X[:,1]) .* 1.1
     ylim = extrema(X[:,2]) .* 1.1
@@ -93,7 +101,7 @@ function plotFit(self::ClassifierMixin, X, y_true ; full_grid=true)
     m = -self.w[1] / self.w[2]
     c = -self.b / self.w[2]
 
-    func = x -> m*x + c
+    func(x) = m*x + c
 
     plot!([func, func],
           fillrange=[ylim[1] ylim[2]],
@@ -106,6 +114,12 @@ function plotFit(self::ClassifierMixin, X, y_true ; full_grid=true)
     cols = ifelse.(inds, :red, :blue)
     scatter!(X[:,1], X[:,2], color=cols)
 end
+
+################################################
+# * Convenience functions
+#----------------------------------------------
+import Base.dropdims
+dropdims(func, args...; dims) = dropdims(func(args..., dims=dims), dims=dims)
 
 
 end

@@ -18,8 +18,10 @@ function distributeSamples(n_samples, n_targets)
     N_leftover = n_samples % n_targets
     target_samples[1:N_leftover] .+= 1
 
-    y = map(eachindex(target_samples)) do id
-        fill(id, target_samples[id])
+    y = map(eachindex(target_samples)) do ind
+        # Force base 0 numbering for convenience later
+        id = ind-1
+        fill(id, target_samples[ind])
     end
 
     y = vcat(y...)
@@ -35,10 +37,7 @@ function makeDonut(radii::AbstractVector; n_samples=100, noise=0.)
     target_samples,y = distributeSamples(n_samples, n_targets)
 
     X = Matrix{Int}(undef,0,2)
-    for t = 1:n_targets
-        sample_size = target_samples[t]
-        r = radii[t]
-
+    for (sample_size,r) in zip(target_samples, radii)
         θ = rand(Uniform(0,2π), sample_size)
         X0 = randomRadius(r, sample_size, noise) .* cos.(θ)
         X1 = randomRadius(r, sample_size, noise) .* sin.(θ)
@@ -65,7 +64,8 @@ function makeCloud(centres, noises ; n_samples=100, n_features)
 
     target_samples,y = distributeSamples(n_samples, n_targets)
 
-    X = map(y) do ind
+    X = map(y) do label
+        ind = label+1
         point = rand.(Normal.(centres[ind], noises[ind]))
     end
     X = hcat(X...) |> permutedims
@@ -112,7 +112,7 @@ function makeXor(n_features=2 ; n_samples=100)
 
     # Yes I'm going to do that instead...
 
-    XorClassify(point) = xor((point .> 0)...) ? 1 : 2
+    XorClassify(point) = xor((point .> 0)...) ? 0 : 1
 
     X = rand(Uniform(-1, 1), n_samples, n_features)
 
@@ -188,6 +188,7 @@ function shuffle!(self::DataContainer)
     self.shuffled = true
 end
 
+export trainTestSplit
 """Split the dataset self.data_df into training and test sets"""
 function trainTestSplit(self::DataContainer, frac=0.8)
     n_train = round(Int, self.n_samples * frac)
