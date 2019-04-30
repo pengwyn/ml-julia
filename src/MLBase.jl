@@ -54,7 +54,7 @@ export ∇y_binaryLogLoss
 # Really these don't belong to anything
 correct(y_true, y_pred) = y_true .== y_pred
 misclassified(y_true, y_pred) = .!(correct(y_true, y_pred))
-score(y_true, y_pred) = mean(y_true .== y_pred)
+score(y_true, y_pred) = mean(correct(y_true, y_pred))
 
 
 ######################################
@@ -85,17 +85,22 @@ function plotFit(self::ClassifierMixin, X, y_true ; full_grid=true)
 
     y_pred = predict(self, X)
 
-    # s = score(y_pred, y_true)
-    s = lossFunc(self, X, y_true)
-    s = round(s, digits=3)
-		
-    xlim = extrema(X[:,1]) .* 1.1
-    ylim = extrema(X[:,2]) .* 1.1
+    s = score(y_pred, y_true)
+
+    l = lossFunc(self, X, y_true)
+    l = round(l, digits=3)
+
+    # xlim = extrema(X[:,1]) .* 1.1
+    # ylim = extrema(X[:,2]) .* 1.1
+    xlim = extrema(X[:,1]) |> collect
+    xlim .+= 0.1 * [-1,+1] * (xlim[2] - xlim[1])
+    ylim = extrema(X[:,2]) |> collect
+    ylim .+= 0.1 * [-1,+1] * (ylim[2] - ylim[1])
 
     p = plot(xlims=xlim,
              ylims=ylim,
              legend=false,
-             title="Score: $s")
+             title="Loss: $l, Score: $s")
 
     # Find the line separating these
     m = -self.w[1] / self.w[2]
@@ -112,7 +117,8 @@ function plotFit(self::ClassifierMixin, X, y_true ; full_grid=true)
 
     inds = misclassified(y_true,y_pred)
     cols = ifelse.(inds, :red, :blue)
-    scatter!(X[:,1], X[:,2], color=cols)
+    markers = ifelse.(y_true .== 0, :circle, :star)
+    scatter!(X[:,1], X[:,2], color=cols, marker=markers, markerstrokewidth=0, markersize=5)
 end
 
 ################################################
