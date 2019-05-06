@@ -150,7 +150,7 @@ Base.@kwdef mutable struct DataContainer
 
     n_samples::Int = size(data_df,1)
     n_features::Int = size(data_df,2) - 1
-    feature_names::Vector{Symbol} = names(data_df)
+    feature_names::Vector{Symbol} = names(data_df)[1:n_features]
     n_targets::Int = length(unique(data_df[:,end]))
 
     shuffled::Bool = false
@@ -248,6 +248,7 @@ function addWhiteNoise!(self::DataContainer, dist=Normal(0,1))
     push!(self.feature_names, name)
     push!(self.scales[1], 1)
     push!(self.scales[2], 0)
+    self.n_features += 1
 end
     # def back_transform(self, X_scaled=None, scales=None):
     #     """

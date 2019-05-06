@@ -82,7 +82,7 @@ end
 export plotFit
 function plotFit(self::ClassifierMixin, X, y_true ; full_grid=true)
     n_features = size(X, 2)
-    @argcheck n_features == 2
+    # @argcheck n_features == 2
 
     y_pred = predict(self, X)
 
