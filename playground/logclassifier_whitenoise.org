@@ -1,0 +1,86 @@
+#+OPTIONS: toc:nil
+
+This is the logistic classifier with white noise applied.
+
+* Setup
+  
+#+BEGIN_SRC jupyter-julia :results silent 
+using Revise
+using Plots
+pyplot()
+
+push!(LOAD_PATH, "../src")
+using Data
+using LogBin
+#+END_SRC
+
+** Generic tester
+
+#+BEGIN_SRC jupyter-julia :results silent
+function TestData(data)
+    cont = DataContainer(data)
+    addWhiteNoise!(cont)
+    X,y = extractArrays(cont)
+
+    class = LogisticClassifierBinary(max_iter=10000)
+    initialiseWeights!(class, X)
+
+    X_train,y_train, X_test,y_test = trainTestSplit(cont)
+
+    fit!(class, X_train, y_train)
+
+    @show class.w
+
+    plot(plotFit(class, X_train, y_train),
+         plotFit(class, X_test, y_test))
+end
+#+END_SRC
+
+* Tests
+
+  Each test has an image (left-side) for the training data and its application
+  to the test data (right-side).
+
+** Blob
+
+   #+BEGIN_SRC jupyter-julia :file images/logclassifier_whitenoise_cloud.png
+   TestData(makeCloud())
+   #+END_SRC
+
+   #+RESULTS:
+   :RESULTS:
+[[file:images/logclassifier_whitenoise_cloud.png]]
+   :END:
+  
+** Spiral
+   #+BEGIN_SRC jupyter-julia :file images/logclassifier_whitenoise_sprial.png
+ TestData(makeSpiral())
+   #+END_SRC
+
+   #+RESULTS:
+   :RESULTS:
+[[file:images/logclassifier_whitenoise_sprial.png]]
+   :END:
+
+** Xor
+   #+BEGIN_SRC jupyter-julia :file images/logclassifier_whitenoise_xor.png
+ TestData(makeXor())
+   #+END_SRC
+
+   #+RESULTS:
+   :RESULTS:
+[[file:images/logclassifier_whitenoise_xor.png]]
+   :END:
+
+** Moons
+  
+   #+BEGIN_SRC jupyter-julia :file images/logclassifier_whitenoise_moons.png
+ TestData(makeMoons())
+   #+END_SRC
+
+   #+RESULTS:
+   :RESULTS:
+   :END:
+[[file:images/logclassifier_whitenoise_moons.png]]
+
+   

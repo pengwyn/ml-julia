@@ -237,6 +237,18 @@ function scale!(self::DataContainer, X_out=self.data[1], X=X_out)
     return X_out
 end
 
+export addWhiteNoise!
+function addWhiteNoise!(self::DataContainer, dist=Normal(0,1))
+    feature_ind = 1 + count(x->startswith(String(x), "whitenoise"), self.feature_names)
+    name = Symbol("whitenoise_$(feature_ind)")
+
+    noise = rand(dist, self.n_samples)
+
+    insertcols!(self.data_df, self.n_features+1, name => noise)
+    push!(self.feature_names, name)
+    push!(self.scales[1], 1)
+    push!(self.scales[2], 0)
+end
     # def back_transform(self, X_scaled=None, scales=None):
     #     """
     #     Back transform the scaled array to the untransformed original
@@ -288,17 +300,4 @@ end
     #     y_one_hot : array, shape = (n_samples, n_targets)
     #         One-hot encoded target array
     #     """
-
-    # def add_white_noise(self):
-    #     """
-    #     Add a new feature of random white noise
-
-    #     ...
-
-    #     Returns
-    #     -------
-    #     X : array of shape [n_samples, n_features + 1]
-    #         The generated samples plus a new column of white noise.
-    #     """
-
 end
