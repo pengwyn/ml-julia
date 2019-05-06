@@ -13,8 +13,6 @@ Base.@kwdef mutable struct LogisticClassifierBinary <: ClassifierMixin
     λ2::Float64 = 0.0
     w = nothing
     b = nothing
-    optimal_w = nothing
-    optimal_b = nothing
 end
 
 import MLBase: initialiseWeights!
@@ -58,17 +56,31 @@ const logisticDeriv = MLBase.DERIVATIVES[:logistic]
 import MLBase: fit!
 function fit!(self::LogisticClassifierBinary, X, y_true)
 
+    optimal_loss = Inf
+    optimal_w = nothing
+    optimal_b = nothing
+    
     for iter in 1:self.max_iter
         z = calcZ(self, X)
         y_pred = forwardPass(self, X, z)
         δ = ∇y_binaryLogLoss(y_true, y_pred) .* logisticDeriv.(z)
-        # δ = 1/length(y_true) * (y_pred - y_true)
 
         ∇ = computeLossGrad(self, X, δ)
         updateParams!(self, ∇...)
 
-        @debug "After iteration $iter" self.w self.b loss(self, X, y_true) δ ∇
+        l = loss(self, X, y_true)
+
+        if l < optimal_loss
+            optimal_loss = l
+            optimal_w = self.w
+            optimal_b = self.b
+        end
+
+        @debug "After iteration $iter" self.w self.b l δ ∇
     end
+
+    self.w = optimal_w
+    self.b = optimal_b
 end
 
 end

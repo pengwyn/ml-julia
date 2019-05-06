@@ -78,6 +78,7 @@ end
 @createVirtualFunc fit!
 @createVirtualFunc lossFunc
 
+# TODO: Should convert this to a recipe.
 export plotFit
 function plotFit(self::ClassifierMixin, X, y_true ; full_grid=true)
     n_features = size(X, 2)
