@@ -5,3 +5,7 @@ deps/deps.jl
 .dir-locals.el
 *.html
 /playground/.ob-jupyter
+/src/GPATH
+/src/GRTAGS
+/src/GTAGS
+/src/gtags.conf

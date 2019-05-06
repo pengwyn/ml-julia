@@ -42,7 +42,14 @@ end
 
 function computeLossGrad(self::LogisticClassifierBinary, X, δ)
     ∇w = X' * δ
-    ∇b = dropdims(sum, δ, dims=1)
+    ∇w += self.λ2 * self.w
+    ∇w += self.λ1 * sign.(self.w)
+
+    # ∇b = dropdims(sum, δ, dims=1)
+    # TODO: Are these correct??
+    ∇b = float(sum(δ))
+    ∇b += self.λ2 * self.b
+    ∇b += self.λ1 * sign(self.b)
 
     return ∇w,∇b
 end

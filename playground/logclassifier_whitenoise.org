@@ -41,6 +41,20 @@ end
   Each test has an image (left-side) for the training data and its application
   to the test data (right-side).
 
+** One Blob
+
+   #+BEGIN_SRC jupyter-julia :file images/logclassifier_whitenoise_cloud_single.png
+   TestData(makeCloud(1))
+   #+END_SRC
+
+   #+RESULTS:
+   :RESULTS:
+: class.w = [2.13699, 4.48723, 0.0466866]
+[[file:images/logclassifier_whitenoise_cloud_single.png]]
+   :END:
+: class.w = [-5.3139, -1.26413, -0.0345763]
+
+  
 ** Blob
 
    #+BEGIN_SRC jupyter-julia :file images/logclassifier_whitenoise_cloud.png
@@ -49,6 +63,7 @@ end
 
    #+RESULTS:
    :RESULTS:
+: class.w = [12.0451, 3.83459, 0.256395]
 [[file:images/logclassifier_whitenoise_cloud.png]]
    :END:
   
