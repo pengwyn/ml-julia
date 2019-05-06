@@ -68,7 +68,7 @@ function fit!(self::LogisticClassifierBinary, X, y_true)
         ∇ = computeLossGrad(self, X, δ)
         updateParams!(self, ∇...)
 
-        l = loss(self, X, y_true)
+        l = lossFunc(self, X, y_true)
 
         if l < optimal_loss
             optimal_loss = l
