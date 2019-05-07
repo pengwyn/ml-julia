@@ -58,7 +58,7 @@ function makeCloud(n_targets=2 ; n_features=2, kwds...)
     makeCloud(centres, noises ; n_features=n_features, kwds...)
 end
 
-function makeCloud(centres, noises ; n_samples=100, n_features)
+function makeCloud(centres, noises ; n_samples=100, n_features=2)
     @argcheck length(centres) == length(noises)
     n_targets = length(centres)
 

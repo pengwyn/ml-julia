@@ -44,7 +44,7 @@ to the test data (right-side).
 
     data = makeCloud(1)
 
-    '((0.721713 0.29107; 0.701541 0.274586; … ; 0.71161 0.290766; 0.703992 0.286064)  (0  0  0  0  0  0  0  0  0  0  …  0  0  0  0  0  0  0  0  0  0))
+    '((-0.244686 -0.490033; -0.231836 -0.288295; … ; -0.270935 -0.382341; -0.27438 -0.359204)  (0  0  0  0  0  0  0  0  0  0  …  0  0  0  0  0  0  0  0  0  0))
 
 First test the normal method
 
@@ -52,8 +52,8 @@ First test the normal method
     xlims!(-1,1)
     ylims!(-1,1)
 
-    class.w = [-5.26107, -1.76146, 0.0203804]
-    class.b = -6.8023650225720615
+    class.w = [1.16341, 3.88964, 0.0965111]
+    class.b = -9.092417801594474
 
 ![img](images/logclassifier_L1L2_no_reg.png)
 
@@ -63,8 +63,40 @@ Now turn on the regularisation and see how the weight parameters are affected.
     xlims!(-1,1)
     ylims!(-1,1)
 
-    class.w = [-1.57788, -0.0615205, 0.0293179]
-    class.b = -2.6238820380490133
+    class.w = [0.0397076, 0.659898, -0.0386549]
+    class.b = -3.3239623585851112
 
 ![img](images/logclassifier_L1L2_with_reg.png)
+
+
+## Overlapping blobs
+
+    radii = [[0.2,0.],
+             [-0.2,0.]]
+    noises = [0.5, 0.5]
+    data = makeCloud(radii, noises)
+
+    '((-0.23614 0.0350279; -0.393309 0.111938; … ; 0.18917 -0.53131; 0.327249 -0.558079)  (0  0  0  0  0  0  0  0  0  0  …  1  1  1  1  1  1  1  1  1  1))
+
+First test the normal method
+
+    p = TestData(data, 0., 0.)
+    xlims!(-1,1)
+    ylims!(-1,1)
+
+    class.w = [-1.15839, 0.322273, 0.230871]
+    class.b = 0.15612352496838766
+
+![img](images/logclassifier_L1L2_overlap_no_reg.png)
+
+Now turn on the regularisation and see how the weight parameters are affected.
+
+    TestData(data, 0.5, 0.5)
+    xlims!(-1,1)
+    ylims!(-1,1)
+
+    class.w = [-1.45749, 0.0429642, -0.273365]
+    class.b = -0.19245610904091007
+
+![img](images/logclassifier_L1L2_overlap_with_reg.png)
 
