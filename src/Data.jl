@@ -53,20 +53,20 @@ function makeCloud(n_targets=2 ; n_features=2, kwds...)
     centres = map(1:n_targets) do i
         rand(Uniform(-1.0, 1.0), n_features)
     end
-    noises = rand(Uniform(0, 0.2), n_targets)
+    radii = rand(Uniform(0, 0.2), n_targets)
 
-    makeCloud(centres, noises ; n_features=n_features, kwds...)
+    makeCloud(centres, radii ; n_features=n_features, kwds...)
 end
 
-function makeCloud(centres, noises ; n_samples=100, n_features=2)
-    @argcheck length(centres) == length(noises)
+function makeCloud(centres, radii ; n_samples=100, n_features=2)
+    @argcheck length(centres) == length(radii)
     n_targets = length(centres)
 
     target_samples,y = distributeSamples(n_samples, n_targets)
 
     X = map(y) do label
         ind = label+1
-        point = rand.(Normal.(centres[ind], noises[ind]))
+        point = rand.(Normal.(centres[ind], radii[ind]))
     end
     X = hcat(X...) |> permutedims
 

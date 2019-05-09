@@ -12,91 +12,54 @@ This is the logistic classifier with white noise applied and both L1 and L2 regu
     using LogBin
 
 
-## Generic tester
+# Overlapping blobs
 
-    function TestData(data, λ1=0.5, λ2=0.5)
-        cont = DataContainer(data)
-        addWhiteNoise!(cont)
-        X,y = extractArrays(cont)
-    
-        class = LogisticClassifierBinary(max_iter=10000, λ1=λ1, λ2=λ2)
-        initialiseWeights!(class, X)
-    
-        X_train,y_train, X_test,y_test = trainTestSplit(cont)
-    
-        fit!(class, X_train, y_train)
-    
-        @show class.w
-        @show class.b
-    
-        plot(plotFit(class, X_train, y_train),
-             plotFit(class, X_test, y_test))
-    end
-
-
-# Tests
-
-Each test has an image (left-side) for the training data and its application
-to the test data (right-side).
-
-
-## Blob
-
-    data = makeCloud(1)
-
-    '((-0.244686 -0.490033; -0.231836 -0.288295; … ; -0.270935 -0.382341; -0.27438 -0.359204)  (0  0  0  0  0  0  0  0  0  0  …  0  0  0  0  0  0  0  0  0  0))
-
-First test the normal method
-
-    p = TestData(data, 0., 0.)
-    xlims!(-1,1)
-    ylims!(-1,1)
-
-    class.w = [1.16341, 3.88964, 0.0965111]
-    class.b = -9.092417801594474
-
-![img](images/logclassifier_L1L2_no_reg.png)
-
-Now turn on the regularisation and see how the weight parameters are affected.
-
-    TestData(data, 0.5, 0.5)
-    xlims!(-1,1)
-    ylims!(-1,1)
-
-    class.w = [0.0397076, 0.659898, -0.0386549]
-    class.b = -3.3239623585851112
-
-![img](images/logclassifier_L1L2_with_reg.png)
-
-
-## Overlapping blobs
-
-    radii = [[0.2,0.],
+    centres = [[0.2,0.],
              [-0.2,0.]]
-    noises = [0.5, 0.5]
-    data = makeCloud(radii, noises)
-
-    '((-0.23614 0.0350279; -0.393309 0.111938; … ; 0.18917 -0.53131; 0.327249 -0.558079)  (0  0  0  0  0  0  0  0  0  0  …  1  1  1  1  1  1  1  1  1  1))
+    radii = [0.5, 0.5]
+    data = makeCloud(centres, radii)
+    
+     cont = DataContainer(data)
+     X,y = extractArrays(cont)
+     X_train,y_train, X_test,y_test = trainTestSplit(cont)
 
 First test the normal method
 
-    p = TestData(data, 0., 0.)
+       class = LogisticClassifierBinary(max_iter=10000, λ1=0., λ2=0.)
+       initialiseWeights!(class, X)
+    
+       fit!(class, X_train, y_train)
+    
+       @show class.w
+       @show class.b
+    
+       plot(plotFit(class, X_train, y_train),
+            plotFit(class, X_test, y_test))
     xlims!(-1,1)
     ylims!(-1,1)
 
-    class.w = [-1.15839, 0.322273, 0.230871]
-    class.b = 0.15612352496838766
+    class.w = [-1.89407, 0.731653]
+    class.b = -0.035016812552922764
 
 ![img](images/logclassifier_L1L2_overlap_no_reg.png)
 
 Now turn on the regularisation and see how the weight parameters are affected.
 
-    TestData(data, 0.5, 0.5)
+       class = LogisticClassifierBinary(max_iter=10000, λ1=10., λ2=0.5)
+       initialiseWeights!(class, X)
+    
+       fit!(class, X_train, y_train)
+    
+       @show class.w
+       @show class.b
+    
+       plot(plotFit(class, X_train, y_train),
+            plotFit(class, X_test, y_test))
     xlims!(-1,1)
     ylims!(-1,1)
 
-    class.w = [-1.45749, 0.0429642, -0.273365]
-    class.b = -0.19245610904091007
+    class.w = [-1.00664, -0.00618968]
+    class.b = 0.615944523774552
 
 ![img](images/logclassifier_L1L2_overlap_with_reg.png)
 
