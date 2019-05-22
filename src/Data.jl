@@ -250,6 +250,23 @@ function addWhiteNoise!(self::DataContainer, dist=Normal(0,1))
     push!(self.scales[2], 0)
     self.n_features += 1
 end
+
+
+function oneHotEnc(y)
+    vals = sort(unique(y))
+
+    length(vals) > length(y)÷4 && error("Probably not correct input given $(length(vals)) unique values")
+
+    out = zeros(Bool, length(y), length(vals))
+    
+    for (i,yi) in enumerate(y)
+        out[i,findfirst(==(yi),vals)] = true
+    end
+
+    @argcheck all(sum(out,dims=2) .== 1)
+
+    return out
+end
     # def back_transform(self, X_scaled=None, scales=None):
     #     """
     #     Back transform the scaled array to the untransformed original
