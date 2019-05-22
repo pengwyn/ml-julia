@@ -18,18 +18,39 @@ using LogMult
 ** Generic tester
 
 #+BEGIN_SRC jupyter-julia :results silent
-function TestData(data)
-    cont = DataContainer(data)
-    X,y = extractArrays(cont)
+  function TestData(data)
+      cont = DataContainer(data...)
 
-    class = LogisticClassifierMultinomial(max_iter=10000)
-    initialiseWeights!(class, cont)
+      class = LogisticClassifierMultinomial(max_iter=10000)
+      initialiseWeights!(class, cont)
 
-    plotFit(class, X, y)
-end
+      # plot(class, cont)
+      X,y = extractArrays(cont)
+      plot(class, X, y)
+  end
 #+END_SRC
 
 ** Blob
+
+   #+BEGIN_SRC jupyter-julia
+     data = makeCloud(5)
+     cont = DataContainer(data...)
+
+     class = LogisticClassifierMultinomial()
+     initialiseWeights!(class, cont)
+
+     X,y = extractArrays(cont)
+     y_pred = forwardPass(class, X)
+
+     @show y[1,:] y_pred[1,:]
+     @show logLoss(y[1,:], y_pred[1,:])
+
+     pred = predict(class,X)
+     tru = oneHotDec(y)
+
+     @show pred tru
+     
+   #+END_SRC
 
    #+BEGIN_SRC jupyter-julia :file images/logclassifier_cloud.png
    TestData(makeCloud(5))
@@ -37,6 +58,7 @@ end
 
    #+RESULTS:
    :RESULTS:
+: size(X_back) = (40401, 2)
 [[file:images/logclassifier_cloud.png]]
    :END:
   

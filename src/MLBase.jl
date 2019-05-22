@@ -6,6 +6,7 @@ module MLBase
 using Statistics
 using Plots
 using ArgCheck
+using Data
 
 # Note: all of these functions are defined for single element only as per julia style
 
@@ -83,46 +84,86 @@ end
 
 # TODO: Should convert this to a recipe.
 export plotFit
-function plotFit(self::ClassifierMixin, X, y_true ; full_grid=true)
-    n_features = size(X, 2)
-    # @argcheck n_features == 2
+using RecipesBase
+@recipe function plot(class::ClassifierMixin, cont::DataContainer)
+    @argcheck cont.n_features == 2
 
-    y_pred = predict(self, X)
+    X,y = extractArrays(cont)
 
-    s = score(y_pred, y_true)
+    return (class,X,y)
+end
 
-    l = lossFunc(self, X, y_true)
+@recipe function plot(class::ClassifierMixin, X, y_true ; show_lines=false)
+    y_pred = forwardPass(class, X)
+    pred = predict(class, X)
+    tru = oneHotDec(y_true)
+    
+    matching = correct(tru,pred)
+
+    s = score(pred, tru)
+
+    l = lossFunc(class, X, y_true)
     l = round(l, digits=3)
 
-    # xlim = extrema(X[:,1]) .* 1.1
-    # ylim = extrema(X[:,2]) .* 1.1
     xlim = extrema(X[:,1]) |> collect
     xlim .+= 0.1 * [-1,+1] * (xlim[2] - xlim[1])
     ylim = extrema(X[:,2]) |> collect
     ylim .+= 0.1 * [-1,+1] * (ylim[2] - ylim[1])
 
-    p = plot(xlims=xlim,
-             ylims=ylim,
-             legend=false,
-             title="Loss: $l, Score: $s")
+    xlims --> xlim
+    ylims --> ylim
+    legend --> false
+    title --> "Loss: $l, Score: $s"
 
-    # Find the line separating these
-    m = -self.w[1] / self.w[2]
-    c = -self.b / self.w[2]
+    # p = plot()
+    
+    # if show_lines
+    #     # TODO
+    #     # Find the line separating these
+    #     m = -class.w[1] / class.w[2]
+    #     c = -class.b / class.w[2]
 
-    func(x) = m*x + c
+    #     func(x) = m*x + c
 
-    plot!([func, func],
-          fillrange=[ylim[1] ylim[2]],
-          fillcolor=[:green :yellow],
-          fillalpha=0.2,
-          color=:black,
-          linewidth=2)
+    #     plot!([func, func],
+    #         fillrange=[ylim[1] ylim[2]],
+    #         fillcolor=[:green :yellow],
+    #         fillalpha=0.2,
+    #         color=:black,
+    #         linewidth=2)
+    # end
 
-    inds = misclassified(y_true,y_pred)
-    cols = ifelse.(inds, :red, :blue)
-    markers = ifelse.(y_true .== 0, :circle, :star)
-    scatter!(X[:,1], X[:,2], color=cols, marker=markers, markerstrokewidth=0, markersize=5)
+    markers = ifelse.(matching, :circle, :cross)
+    # cols = ifelse.(inds, :red, :blue)
+    cols = tru
+    # scatter(X[:,1], X[:,2], color=cols, marker=markers, markerstrokewidth=0, markersize=5)
+
+    xgrid = LinRange(xlim..., 201)
+    ygrid = LinRange(ylim..., 201)
+
+    # TODO: fix this
+    x_full = [x for x in xgrid for y in ygrid]
+    y_full = [y for x in xgrid for y in ygrid]
+    X_back = [x_full y_full]
+    @show size(X_back)
+    tru_back = predict(class, X_back)
+
+    tru_back = reshape(tru_back, length(xgrid), length(ygrid))
+
+    @series begin
+        seriestype := :heatmap
+        xgrid, ygrid, tru_back
+    end
+
+    @series begin
+        seriestype := :scatter
+        color := cols
+        marker := markers
+        markerstrokewidth --> 0
+        markersize --> 5
+
+        (X[:,1], X[:,2])
+    end
 end
 
 ################################################

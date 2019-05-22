@@ -31,7 +31,8 @@ import MLBase: predict
 function predict(self::LogisticClassifierMultinomial, X)
     y = forwardPass(self, X)
     
-    labels = mapslices(argmax, y, dims=2)
+    # labels = mapslices(argmax, y, dims=2)
+    labels = oneHotDec(y)
 end
 
 import MLBase: lossFunc

@@ -161,21 +161,6 @@ Base.@kwdef mutable struct DataContainer
 end
 
 function DataContainer(data_features, data_targets, shuffle_data=true, conv_one_hot=true)
-    data_df,n_features,n_targets = storeDataAsDF(data_features, data_targets, conv_one_hot=conv_one_hot)
-
-    obj = DataContainer(data_df=data_df,
-                        n_samples=size(data_df,1),
-                        n_features=n_features,
-                        feature_names=names(data_df)[1:n_features],
-                        n_targets=n_targets,
-                        target_names=names(data_df)[end-n_targets:n_targets])
-
-    shuffle_data && shuffle!(obj)
-
-    return obj
-end
-
-function storeDataAsDF(data_features, data_targets ; conv_one_hot=true)
     @argcheck size(data_features, 1) == size(data_targets, 1)
 
     if conv_one_hot
@@ -203,13 +188,36 @@ function storeDataAsDF(data_features, data_targets ; conv_one_hot=true)
 
     df = DataFrame(; feature_columns..., target_columns...)
 
+    obj = DataContainer(data_df=df,
+                        n_samples=size(df,1),
+                        n_features=n_features,
+                        feature_names=names(df)[1:n_features],
+                        n_targets=n_targets,
+                        target_names=names(df)[end-n_targets:n_targets])
+
+    shuffle_data && shuffle!(obj)
+
+    return obj
+end
+
+# Replace this with something simpler.
+DataContainer(cont::DataContainer, df::DataFrame) = DataContainer(df,
+                                                                  n_samples=size(df,1),
+                                                                  n_features=cont.n_features,
+                                                                  feature_names=cont.feature_names,
+                                                                  n_tragets=cont.n_targets,
+                                                                  target_names=cont.target_names,
+                                                                  shuffled=cont.shuffled,
+                                                                  scales=cont.scales)
+
+function storeDataAsDF(data_features, data_targets ; conv_one_hot=true)
     return df,n_features,n_targets
 end
 
 export extractArrays
 function extractArrays(self::DataContainer)
     X = self.data_df[:, 1:self.n_features] |> Matrix
-    y = self.data_df[:, end-self.n_targets:end] |> Matrix
+    y = self.data_df[:, self.n_features+1:end] |> Matrix
     return X, y
 end
 
@@ -220,18 +228,15 @@ end
 
 export trainTestSplit
 """Split the dataset self.data_df into training and test sets"""
-function trainTestSplit(self::DataContainer, frac=0.8)
+function trainTestSplit(self::DataContainer, frac=0.8, shuffle=true)
+    shuffle!(self)
+
     n_train = round(Int, self.n_samples * frac)
 
-    X,y = extractArrays(self)
+    train_df = self.data_df[1:n_train, :]
+    test_df = self.data_df[n_train+1:end, :]
 
-    X_train = X[1:n_train, :]
-    y_train = y[1:n_train, :]
-
-    X_test = X[n_train+1:end, :]
-    y_test = y[n_train+1:end, :]
-
-    return X_train, y_train, X_test, y_test
+    return DataContainer(self, train_df), DataContainer(self, test_df)
 end
     
 using RecipesBase
@@ -282,8 +287,12 @@ function addWhiteNoise!(self::DataContainer, dist=Normal(0,1))
 end
 
 
+export oneHotEnc
 function oneHotEnc(y)
     vals = sort(unique(y))
+    # Going to be boring here
+    # TODO allow general case
+    # @argcheck vals == 1:length(vals)
 
     length(vals) > length(y)÷4 && error("Probably not correct input given $(length(vals)) unique values")
 
@@ -297,6 +306,9 @@ function oneHotEnc(y)
 
     return out
 end
+
+export oneHotDec
+oneHotDec(y, labels=axes(y,2)) = mapslices(row -> labels[argmax(row)], y, dims=2)
     # def back_transform(self, X_scaled=None, scales=None):
     #     """
     #     Back transform the scaled array to the untransformed original
