@@ -145,41 +145,71 @@ end
 
 export DataContainer
 Base.@kwdef mutable struct DataContainer
-    data
-    data_df::DataFrame = storeDataAsDF(data)
+    data_df::DataFrame
 
-    n_samples::Int = size(data_df,1)
-    n_features::Int = size(data_df,2) - 1
-    feature_names::Vector{Symbol} = names(data_df)[1:n_features]
-    n_targets::Int = length(unique(data_df[:,end]))
+    n_samples::Int
+
+    n_features::Int
+    feature_names::Vector{Symbol}
+
+    n_targets::Int
+    target_names::Vector{Symbol}
 
     shuffled::Bool = false
 
     scales = [ones(n_features), zeros(n_features)]
 end
 
-function DataContainer(data, shuffle_data=true)
-    obj = DataContainer(data=data)
+function DataContainer(data_features, data_targets, shuffle_data=true, conv_one_hot=true)
+    data_df,n_features,n_targets = storeDataAsDF(data_features, data_targets, conv_one_hot=conv_one_hot)
+
+    obj = DataContainer(data_df=data_df,
+                        n_samples=size(data_df,1),
+                        n_features=n_features,
+                        feature_names=names(data_df)[1:n_features],
+                        n_targets=n_targets,
+                        target_names=names(data_df)[end-n_targets:n_targets])
+
     shuffle_data && shuffle!(obj)
+
     return obj
 end
 
-storeDataAsDF(data::DataFrame) = data
-function storeDataAsDF(data)
-    X,y = data
-    n_samples,n_features = size(X)
+function storeDataAsDF(data_features, data_targets ; conv_one_hot=true)
+    @argcheck size(data_features, 1) == size(data_targets, 1)
 
-    columns = map(1:n_features) do col
-        Symbol("X$col") => X[:,col]
+    if conv_one_hot
+        @assert ndims(data_targets) == 1
+        if length(unique(data_targets)) > 1
+            data_targets = oneHotEnc(data_targets)
+        end
     end
 
-    df = DataFrame(; columns..., y=y)
+    # Force matrix
+    if ndims(data_targets) == 1
+        data_targets = reshape(data_targets, :, 1)
+    end
+
+    n_samples,n_features = size(data_features)
+    n_samples,n_targets = size(data_targets)
+
+    feature_columns = map(1:n_features) do col
+        Symbol("X$col") => data_features[:,col]
+    end
+
+    target_columns = map(1:n_targets) do col
+        Symbol("y$col") => data_targets[:,col]
+    end
+
+    df = DataFrame(; feature_columns..., target_columns...)
+
+    return df,n_features,n_targets
 end
 
 export extractArrays
 function extractArrays(self::DataContainer)
     X = self.data_df[:, 1:self.n_features] |> Matrix
-    y = self.data_df[:, end] |> Vector
+    y = self.data_df[:, end-self.n_targets:end] |> Matrix
     return X, y
 end
 
@@ -196,10 +226,10 @@ function trainTestSplit(self::DataContainer, frac=0.8)
     X,y = extractArrays(self)
 
     X_train = X[1:n_train, :]
-    y_train = y[1:n_train]
+    y_train = y[1:n_train, :]
 
     X_test = X[n_train+1:end, :]
-    y_test = y[n_train+1:end]
+    y_test = y[n_train+1:end, :]
 
     return X_train, y_train, X_test, y_test
 end
@@ -304,18 +334,4 @@ end
     #         Extended array containing additional polynomial and interaction features
     #     """
 
-    # def one_hot_enc(self, y=None):
-    #     """
-    #     Convert one-dimensional target lists or arrays to one-hot encoded arrays
-
-    #     Parameters
-    #     ----------
-    #     y : list/array (default = None)
-    #         List/array of targets
-
-    #     Returns
-    #     -------
-    #     y_one_hot : array, shape = (n_samples, n_targets)
-    #         One-hot encoded target array
-    #     """
 end
