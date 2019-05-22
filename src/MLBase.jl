@@ -39,13 +39,16 @@ DERIVATIVES = Dict(key => x -> ForwardDiff.derivative(func, x)
 export squaredLoss, logLoss, binaryLogLoss
 
 squaredLoss(y_true, y_pred) = (1 - -y_true*y_pred)^2
-logLoss(y_true, y_pred) = 1/log(2) * log(1 + exp(-y_true*y_pred))
+# logLoss(y_true, y_pred) = 1/log(2) * log(1 + exp(-y_true*y_pred))
+logLoss(y_true, y_pred) = -sum(y_true .* log.(y_pred))
 binaryLogLoss(y_true, y_pred) = -(y_true*log(y_pred) + (1-y_true)*log(1 - y_pred))
 
 loss(func, args...) = mean(func.(args...))
+# for func in [:squaredLoss, :logLoss, :binaryLogLoss]
 for func in [:squaredLoss, :logLoss, :binaryLogLoss]
     @eval $func(y_true::AbstractVector, y_pred::AbstractVector) = loss($func, y_true, y_pred)
 end
+logLoss(y_true::AbstractMatrix, y_pred::AbstractMatrix) = logLoss(collect(eachrow(y_true)), collect(eachrow(y_pred)))
 
 export ∇y_binaryLogLoss
 

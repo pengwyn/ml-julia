@@ -1,0 +1,52 @@
+#+OPTIONS: toc:nil
+
+A multinomial classifier
+
+* Setup
+  
+#+BEGIN_SRC jupyter-julia :results silent 
+using Revise
+using Plots
+pyplot()
+
+push!(LOAD_PATH, "../src")
+using Data
+using LogMult
+#+END_SRC
+
+* A dumb classifier
+** Generic tester
+
+#+BEGIN_SRC jupyter-julia :results silent
+function TestData(data)
+    cont = DataContainer(data)
+    X,y = extractArrays(cont)
+
+    class = LogisticClassifierMultinomial(max_iter=10000)
+    initialiseWeights!(class, cont)
+
+    plotFit(class, X, y)
+end
+#+END_SRC
+
+** Blob
+
+   #+BEGIN_SRC jupyter-julia :file images/logclassifier_cloud.png
+   TestData(makeCloud(5))
+   #+END_SRC
+
+   #+RESULTS:
+   :RESULTS:
+[[file:images/logclassifier_cloud.png]]
+   :END:
+  
+** Spiral
+   #+BEGIN_SRC jupyter-julia :file images/logclassifier_sprial.png
+ TestData(makeSpiral(3))
+   #+END_SRC
+
+   #+RESULTS:
+   :RESULTS:
+[[file:images/logclassifier_sprial.png]]
+   :END:
+
