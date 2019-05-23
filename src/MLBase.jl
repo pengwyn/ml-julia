@@ -133,9 +133,12 @@ end
     #         linewidth=2)
     # end
 
+    pal = palette(:default)
+    pal_light = [RGBA(col.r, col.g, col.b, 0.4) for col in pal]
+
     markers = ifelse.(matching, :circle, :cross)
     # cols = ifelse.(inds, :red, :blue)
-    cols = tru
+    cols = getindex.(Ref(pal), tru)
     # scatter(X[:,1], X[:,2], color=cols, marker=markers, markerstrokewidth=0, markersize=5)
 
     xgrid = LinRange(xlim..., 201)
@@ -149,18 +152,21 @@ end
     tru_back = predict(class, X_back)
 
     tru_back = reshape(tru_back, length(xgrid), length(ygrid))
+    col_back = getindex.(Ref(pal_light), tru_back)
 
     @series begin
         seriestype := :heatmap
-        xgrid, ygrid, tru_back
+        xgrid, ygrid, col_back
     end
 
     @series begin
         seriestype := :scatter
         color := cols
+        # markerstrokecolor := cols
+        # markercolor := nothing
         marker := markers
-        markerstrokewidth --> 0
-        markersize --> 5
+        markerstrokewidth --> 1
+        markersize --> 10
 
         (X[:,1], X[:,2])
     end
