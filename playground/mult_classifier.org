@@ -6,6 +6,7 @@ A multinomial classifier
   
 #+BEGIN_SRC jupyter-julia :results silent 
 using Revise
+using DanUtils
 using Plots
 pyplot()
 
@@ -50,44 +51,16 @@ using LogMult
 
      @show pred tru
      
+     nothing
    #+END_SRC
 
    #+RESULTS:
    :RESULTS:
-: y[1, :] = Bool[false, false, false, true, false]
-: y_pred[1, :] = [0.0938434, 0.0391384, 0.170931, 0.163501, 0.532587]
-: logLoss(y[1, :], y_pred[1, :]) = 0.36218725531208124
-: pred = [5; 5; 5; 5; 1; 5; 5; 5; 5; 5; 5; 1; 1; 5; 1; 1; 1; 5; 1; 3; 5; 1; 5; 1; 5; 1; 1; 1; 5; 5; 1; 1; 5; 5; 5; 1; 5; 5; 1; 5; 5; 5; 1; 1; 5; 1; 1; 5; 5; 5; 5; 5; 5; 5; 1; 1; 1; 5; 5; 1; 5; 5; 5; 5; 1; 1; 1; 5; 5; 5; 5; 5; 5; 1; 1; 1; 5; 5; 5; 5; 1; 5; 5; 5; 1; 1; 1; 5; 1; 5; 5; 1; 5; 1; 1; 5; 5; 5; 5; 5]
-: tru = [4; 4; 4; 2; 1; 2; 3; 2; 2; 2; 3; 1; 1; 1; 5; 5; 5; 4; 1; 1; 4; 5; 3; 1; 2; 1; 5; 1; 4; 2; 1; 5; 3; 3; 4; 5; 2; 3; 5; 2; 3; 2; 5; 5; 4; 1; 5; 3; 3; 2; 4; 4; 3; 2; 1; 5; 5; 3; 3; 5; 2; 4; 2; 3; 5; 1; 1; 4; 2; 2; 4; 4; 4; 1; 5; 5; 3; 4; 4; 3; 1; 2; 2; 4; 1; 5; 5; 3; 1; 3; 3; 1; 2; 1; 5; 3; 4; 2; 4; 3]
-#+BEGIN_EXAMPLE
-100×1 Array{Int64,2}:
- 4
- 4
- 4
- 2
- 1
- 2
- 3
- 2
- 2
- 2
- 3
- 1
- 1
- ⋮
- 1
- 3
- 3
- 1
- 2
- 1
- 5
- 3
- 4
- 2
- 4
- 3
-#+END_EXAMPLE
+: y[1, :] = Bool[false, true, false, false, false]
+: y_pred[1, :] = [0.37501, 0.336744, 0.0493263, 0.197204, 0.0417164]
+: logLoss(y[1, :], y_pred[1, :]) = 0.21768648686250164
+: pred = [1; 1; 1; 2; 2; 1; 1; 2; 1; 1; 1; 2; 2; 1; 1; 1; 1; 1; 2; 1; 1; 1; 1; 1; 2; 2; 1; 1; 1; 1; 1; 1; 1; 1; 2; 1; 1; 1; 2; 2; 1; 1; 1; 1; 1; 1; 2; 2; 1; 2; 2; 4; 1; 2; 2; 2; 1; 2; 1; 2; 1; 1; 2; 1; 2; 2; 2; 1; 1; 1; 1; 1; 1; 2; 1; 2; 1; 2; 2; 2; 1; 2; 2; 2; 1; 1; 2; 2; 1; 2; 2; 1; 2; 2; 1; 1; 1; 1; 2; 1]
+: tru = [2; 4; 2; 3; 3; 2; 5; 1; 5; 2; 2; 1; 1; 2; 2; 5; 2; 5; 1; 5; 4; 5; 2; 5; 3; 1; 5; 5; 4; 4; 5; 2; 4; 4; 3; 4; 2; 5; 1; 1; 2; 4; 4; 2; 4; 4; 3; 1; 5; 3; 3; 1; 4; 3; 3; 3; 2; 3; 4; 1; 4; 5; 3; 5; 3; 1; 1; 4; 2; 5; 2; 4; 2; 1; 4; 3; 2; 1; 1; 3; 5; 3; 1; 1; 4; 5; 3; 1; 4; 3; 3; 5; 3; 1; 2; 5; 5; 4; 1; 2]
    :END:
 
    #+BEGIN_SRC jupyter-julia :file images/dumb_mult_cloud.png
@@ -96,7 +69,6 @@ using LogMult
 
    #+RESULTS:
    :RESULTS:
-: size(X_back) = (40401, 2)
 [[file:images/dumb_mult_cloud.png]]
    :END:
   
@@ -111,3 +83,312 @@ using LogMult
 [[file:images/dumb_mult_spiral.png]]
    :END:
 
+** Animated spiral
+
+   #+BEGIN_SRC jupyter-julia
+     class = LogisticClassifierMultinomial()
+     initialiseWeights!(class, 2, 3)
+
+     @show y[1,:] y_pred[1,:]
+     @show logLoss(y[1,:], y_pred[1,:])
+
+     pred = predict(class,X)
+     tru = oneHotDec(y)
+
+     @show pred tru
+     
+     anim = @animate for p = LinRange(0,2π,401)
+     @show p
+        phases = p*[1, 2, 3]
+        data = makeSpiral(phases, n_samples=5000)
+        cont = DataContainer(data...)
+
+      X,y = extractArrays(cont)
+        plot(class, X, y, xlims=[-2.5, 2.5], ylims=[-2.5,2.5])
+    end 
+    gif(anim, "images/dumb_spiral.gif", fps=10)
+   #+END_SRC
+
+** Testing zone
+
+   
+   #+BEGIN_SRC jupyter-julia
+     data = makeCloud(5)
+     cont = DataContainer(data...)
+
+     class = LogisticClassifierMultinomial(max_iter=10000)
+     initialiseWeights!(class, cont)
+
+     X,y = extractArrays(cont)
+     y_pred = forwardPass(class, X)
+
+     pred = predict(class,X)
+     tru = oneHotDec(y)
+
+        z = LogMult.calcZ(class, X)
+        y_pred = forwardPass(class, X, z)
+     
+        using MLBase, Data
+logisticDeriv = MLBase.DERIVATIVES[:logistic]
+    δ = ∇y_logLoss(y, y_pred) .* logisticDeriv.(z)
+        ∇ = LogMult.computeLossGrad(class, X, δ)
+        LogMult.updateParams!(class, ∇...)
+     
+
+   #+END_SRC
+
+   #+RESULTS:
+   :RESULTS:
+: 1×5 Array{Float64,2}:
+:  0.221266  0.701143  -0.957529  0.903043  -0.50148
+   :END:
+
+   #+BEGIN_SRC jupyter-julia
+fit!(class, X, y)
+   #+END_SRC
+
+   #+RESULTS:
+   :RESULTS:
+: 1×5 Array{Float64,2}:
+:  -5.23197  -9.80851  0.533336  -6.94848  -5.66991
+   :END:
+
+   #+BEGIN_SRC jupyter-julia
+     # data = makeSpiral(phases, n_samples=5000)     
+     function DoGif(data, plot_filename, λ1=0., λ2=0.)
+         cont = DataContainer(data...)
+         X,y = extractArrays(cont)
+         class = LogisticClassifierMultinomial(max_iter=10, λ1=λ1, λ2=λ2)
+         initialiseWeights!(class, cont)
+
+         tot_iter = 0
+         anim = @animate for n = [fill(1, 20) ; fill(10, 20) ; fill(50, 20) ; fill(200, 20)]
+             for i in 1:n
+                 @printagain @show tot_iter
+                 fit!(class, X, y)
+                 tot_iter += 1
+             end
+             plot(class, X, y, annotate=(1.0,1.0,"iter:$tot_iter"))
+         end 
+         gif(anim, plot_filename, fps=10)
+     end
+   #+END_SRC
+
+   #+RESULTS:
+   :RESULTS:
+#+BEGIN_EXAMPLE
+tot_iter = 0
+tot_iter = 20
+tot_iter = 122
+tot_iter = 233
+tot_iter = 416
+tot_iter = 587
+tot_iter = 769
+tot_iter = 942
+tot_iter = 1120
+tot_iter = 1310
+tot_iter = 1496
+tot_iter = 1691
+tot_iter = 1894
+tot_iter = 2096
+tot_iter = 2293
+tot_iter = 2487
+tot_iter = 2693
+tot_iter = 2897
+tot_iter = 3095
+tot_iter = 3298
+tot_iter = 3500
+tot_iter = 3702
+tot_iter = 3904
+tot_iter = 4104
+tot_iter = 4304
+tot_iter = 4504
+tot_iter = 4702
+tot_iter = 4889
+tot_iter = 5082
+┌ Info: Saved animation to 
+│   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_cloud.gif
+└ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
+tot_iter = 3
+tot_iter = 26
+tot_iter = 130
+tot_iter = 248
+tot_iter = 420
+tot_iter = 596
+tot_iter = 754
+tot_iter = 920
+tot_iter = 1096
+tot_iter = 1275
+tot_iter = 1470
+tot_iter = 1669
+tot_iter = 1863
+tot_iter = 2056
+tot_iter = 2258
+tot_iter = 2460
+tot_iter = 2665
+tot_iter = 2870
+tot_iter = 3071
+tot_iter = 3278
+tot_iter = 3483
+tot_iter = 3687
+tot_iter = 3893
+tot_iter = 4095
+tot_iter = 4301
+tot_iter = 4507
+tot_iter = 4714
+tot_iter = 4911
+tot_iter = 5098
+#+END_EXAMPLE
+[[file:./.ob-jupyter/812a5b7f0788bce3342921128a1702b4ba6cfe06.png]]
+: ┌ Info: Saved animation to 
+: │   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_spiral.gif
+: └ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
+#+BEGIN_EXPORT html
+<img src="images/mult_spiral.gif" />
+#+END_EXPORT
+   :END:
+
+   #+BEGIN_SRC jupyter-julia
+     data = makeCloud(5, n_samples=1000)
+     DoGif(data, "images/mult_cloud.gif")
+     DoGif(data, "images/mult_cloud_l1l2.gif", 0.5, 0.5)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+#+BEGIN_EXAMPLE
+tot_iter = 15
+tot_iter = 83
+tot_iter = 181
+tot_iter = 322
+tot_iter = 496
+tot_iter = 670
+tot_iter = 840
+tot_iter = 1010
+tot_iter = 1170
+tot_iter = 1361
+tot_iter = 1556
+tot_iter = 1752
+tot_iter = 1947
+tot_iter = 2127
+tot_iter = 2320
+tot_iter = 2516
+tot_iter = 2708
+tot_iter = 2901
+tot_iter = 3094
+tot_iter = 3287
+tot_iter = 3478
+tot_iter = 3673
+tot_iter = 3869
+tot_iter = 4063
+tot_iter = 4255
+tot_iter = 4447
+tot_iter = 4635
+tot_iter = 4829
+tot_iter = 5023
+┌ Info: Saved animation to 
+│   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_cloud.gif
+└ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
+#+END_EXAMPLE
+# [goto error]
+#+BEGIN_EXAMPLE
+MethodError: no method matching DoGif(::Tuple{Array{Float64,2},Array{Int64,1}}, ::String, ::Float64, ::Float64)
+Closest candidates are:
+  DoGif(::Any, ::Any) at In[47]:3
+
+Stacktrace:
+ [1] top-level scope at In[50]:3
+tot_iter = 0
+tot_iter = 18
+tot_iter = 110
+tot_iter = 212
+tot_iter = 376
+tot_iter = 553
+tot_iter = 720
+tot_iter = 897
+tot_iter = 1070
+tot_iter = 1246
+tot_iter = 1441
+tot_iter = 1638
+tot_iter = 1833
+tot_iter = 2020
+tot_iter = 2209
+tot_iter = 2394
+tot_iter = 2584
+tot_iter = 2775
+tot_iter = 2970
+tot_iter = 3160
+tot_iter = 3356
+tot_iter = 3552
+tot_iter = 3750
+tot_iter = 3946
+tot_iter = 4138
+tot_iter = 4325
+tot_iter = 4517
+tot_iter = 4710
+tot_iter = 4904
+tot_iter = 5098
+┌ Info: Saved animation to 
+│   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_cloud.gif
+└ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
+#+END_EXAMPLE
+# [goto error]
+: MethodError: no method matching DoGif(::Tuple{Array{Float64,2},Array{Int64,1}}, ::String, ::Float64, ::Float64)
+: Closest candidates are:
+:   DoGif(::Any, ::Any) at In[47]:3
+: 
+: Stacktrace:
+:  [1] top-level scope at In[51]:3
+:END:
+
+#+BEGIN_SRC jupyter-julia
+  data = makeSpiral(5, n_samples=1000)
+  DoGif(data, "images/mult_spiral.gif")
+  DoGif(data, "images/mult_spiral.gif", 0.5, 0.5)
+   #+END_SRC
+
+   #+RESULTS:
+   :RESULTS:
+#+BEGIN_EXAMPLE
+tot_iter = 3
+tot_iter = 30
+tot_iter = 133
+tot_iter = 242
+tot_iter = 416
+tot_iter = 578
+tot_iter = 750
+tot_iter = 920
+tot_iter = 1093
+tot_iter = 1268
+tot_iter = 1460
+tot_iter = 1657
+tot_iter = 1855
+tot_iter = 2051
+tot_iter = 2248
+tot_iter = 2440
+tot_iter = 2636
+tot_iter = 2831
+tot_iter = 3027
+tot_iter = 3222
+tot_iter = 3420
+tot_iter = 3620
+tot_iter = 3820
+tot_iter = 4018
+tot_iter = 4211
+tot_iter = 4403
+tot_iter = 4596
+tot_iter = 4788
+tot_iter = 4981
+tot_iter = 5173
+┌ Info: Saved animation to 
+│   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_spiral.gif
+└ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
+#+END_EXAMPLE
+# [goto error]
+: MethodError: no method matching DoGif(::Tuple{Array{Float64,2},Array{Int64,1}}, ::String, ::Float64, ::Float64)
+: Closest candidates are:
+:   DoGif(::Any, ::Any) at In[47]:3
+: 
+: Stacktrace:
+:  [1] top-level scope at In[52]:3
+   :END:

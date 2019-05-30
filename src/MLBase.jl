@@ -51,9 +51,13 @@ for func in [:squaredLoss, :logLoss, :binaryLogLoss]
 end
 logLoss(y_true::AbstractMatrix, y_pred::AbstractMatrix) = logLoss(collect(eachrow(y_true)), collect(eachrow(y_pred)))
 
-export ∇y_binaryLogLoss
+
+
+
+export ∇y_binaryLogLoss, ∇y_logLoss
 
 ∇y_binaryLogLoss(y_true::AbstractVector, y_pred::AbstractVector) = @. 1/length(y_true) * (y_pred - y_true) / (y_pred * (1 - y_pred))
+∇y_logLoss(y_true::AbstractMatrix, y_pred::AbstractMatrix) = 1/size(y_true,1) * @. (y_pred - y_true) / (y_pred * (1 - y_pred))
 
 # Really these don't belong to anything
 correct(y_true, y_pred) = y_true .== y_pred
@@ -115,6 +119,9 @@ end
     legend --> false
     title --> "Loss: $l, Score: $s"
 
+    xlim = plotattributes[:xlims]
+    ylim = plotattributes[:ylims]
+
     # p = plot()
     
     # if show_lines
@@ -137,18 +144,17 @@ end
     pal_light = [RGBA(col.r, col.g, col.b, 0.4) for col in pal]
 
     markers = ifelse.(matching, :circle, :cross)
-    # cols = ifelse.(inds, :red, :blue)
-    cols = getindex.(Ref(pal), tru)
-    # scatter(X[:,1], X[:,2], color=cols, marker=markers, markerstrokewidth=0, markersize=5)
 
-    xgrid = LinRange(xlim..., 201)
-    ygrid = LinRange(ylim..., 201)
+    cols = getindex.(Ref(pal), tru)
+    cols_pred = getindex.(Ref(pal), pred)
+
+    xgrid = LinRange(xlim..., 101)
+    ygrid = LinRange(ylim..., 101)
 
     # TODO: fix this
     x_full = [x for x in xgrid for y in ygrid]
     y_full = [y for x in xgrid for y in ygrid]
     X_back = [x_full y_full]
-    @show size(X_back)
     tru_back = predict(class, X_back)
 
     tru_back = reshape(tru_back, length(xgrid), length(ygrid))
@@ -161,12 +167,25 @@ end
 
     @series begin
         seriestype := :scatter
+        color := cols_pred
+        # markerstrokecolor := cols
+        # markercolor := nothing
+        # marker := markers
+        markerstrokewidth --> 0.5
+        markersize --> 8
+
+        # (X[matching,1], X[matching,2])
+        (X[:,1], X[:,2])
+    end
+
+    @series begin
+        seriestype := :scatter
         color := cols
         # markerstrokecolor := cols
         # markercolor := nothing
-        marker := markers
-        markerstrokewidth --> 1
-        markersize --> 10
+        # marker := markers
+        markerstrokewidth --> 0.5
+        markersize --> 4
 
         (X[:,1], X[:,2])
     end

@@ -48,9 +48,9 @@ function computeLossGrad(self::LogisticClassifierMultinomial, X, δ)
 
     # ∇b = dropdims(sum, δ, dims=1)
     # TODO: Are these correct??
-    ∇b = float(sum(δ))
+    ∇b = sum(δ,dims=1)
     ∇b += self.λ2 * self.b
-    ∇b += self.λ1 * sign(self.b)
+    ∇b += self.λ1 * sign.(self.b)
 
     return ∇w,∇b
 end
@@ -71,7 +71,7 @@ function fit!(self::LogisticClassifierMultinomial, X, y_true)
     for iter in 1:self.max_iter
         z = calcZ(self, X)
         y_pred = forwardPass(self, X, z)
-        δ = ∇y_binaryLogLoss(y_true, y_pred) .* logisticDeriv.(z)
+        δ = ∇y_logLoss(y_true, y_pred) .* logisticDeriv.(z)
 
         ∇ = computeLossGrad(self, X, δ)
         updateParams!(self, ∇...)
