@@ -9,3 +9,5 @@ deps/deps.jl
 /src/GRTAGS
 /src/GTAGS
 /src/gtags.conf
+playground/tmp.gif
+src/.ob-jupyter/
