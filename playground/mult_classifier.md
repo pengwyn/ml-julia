@@ -1,0 +1,285 @@
+A multinomial classifier
+
+
+# Setup
+
+    using Revise
+    using DanUtils
+    using Plots
+    pyplot()
+    
+    push!(LOAD_PATH, "../src")
+    using Data
+    using LogMult
+
+
+# A dumb classifier
+
+
+## Generic tester
+
+    function TestData(data)
+        cont = DataContainer(data...)
+    
+        class = LogisticClassifierMultinomial(max_iter=10000)
+        initialiseWeights!(class, cont)
+    
+        # plot(class, cont)
+        X,y = extractArrays(cont)
+        plot(class, X, y)
+    end
+
+
+## Blob
+
+    data = makeCloud(5)
+    cont = DataContainer(data...)
+    
+    class = LogisticClassifierMultinomial()
+    initialiseWeights!(class, cont)
+    
+    X,y = extractArrays(cont)
+    y_pred = forwardPass(class, X)
+    
+    @show y[1,:] y_pred[1,:]
+    @show logLoss(y[1,:], y_pred[1,:])
+    
+    pred = predict(class,X)
+    tru = oneHotDec(y)
+    
+    @show pred tru
+    
+    nothing
+
+    y[1, :] = Bool[false, true, false, false, false]
+    y_pred[1, :] = [0.37501, 0.336744, 0.0493263, 0.197204, 0.0417164]
+    logLoss(y[1, :], y_pred[1, :]) = 0.21768648686250164
+    pred = [1; 1; 1; 2; 2; 1; 1; 2; 1; 1; 1; 2; 2; 1; 1; 1; 1; 1; 2; 1; 1; 1; 1; 1; 2; 2; 1; 1; 1; 1; 1; 1; 1; 1; 2; 1; 1; 1; 2; 2; 1; 1; 1; 1; 1; 1; 2; 2; 1; 2; 2; 4; 1; 2; 2; 2; 1; 2; 1; 2; 1; 1; 2; 1; 2; 2; 2; 1; 1; 1; 1; 1; 1; 2; 1; 2; 1; 2; 2; 2; 1; 2; 2; 2; 1; 1; 2; 2; 1; 2; 2; 1; 2; 2; 1; 1; 1; 1; 2; 1]
+    tru = [2; 4; 2; 3; 3; 2; 5; 1; 5; 2; 2; 1; 1; 2; 2; 5; 2; 5; 1; 5; 4; 5; 2; 5; 3; 1; 5; 5; 4; 4; 5; 2; 4; 4; 3; 4; 2; 5; 1; 1; 2; 4; 4; 2; 4; 4; 3; 1; 5; 3; 3; 1; 4; 3; 3; 3; 2; 3; 4; 1; 4; 5; 3; 5; 3; 1; 1; 4; 2; 5; 2; 4; 2; 1; 4; 3; 2; 1; 1; 3; 5; 3; 1; 1; 4; 5; 3; 1; 4; 3; 3; 5; 3; 1; 2; 5; 5; 4; 1; 2]
+
+    TestData(makeCloud(5))
+
+![img](images/dumb_mult_cloud.png)
+
+
+## Spiral
+
+    TestData(makeSpiral(3, n_samples=1000))
+
+    size(X_back) = (40401, 2)
+
+![img](images/dumb_mult_spiral.png)
+
+
+## Animated spiral
+
+     class = LogisticClassifierMultinomial()
+     initialiseWeights!(class, 2, 3)
+    
+     @show y[1,:] y_pred[1,:]
+     @show logLoss(y[1,:], y_pred[1,:])
+    
+     pred = predict(class,X)
+     tru = oneHotDec(y)
+    
+     @show pred tru
+    
+     anim = @animate for p = LinRange(0,2π,401)
+     @show p
+        phases = p*[1, 2, 3]
+        data = makeSpiral(phases, n_samples=5000)
+        cont = DataContainer(data...)
+    
+      X,y = extractArrays(cont)
+        plot(class, X, y, xlims=[-2.5, 2.5], ylims=[-2.5,2.5])
+    end 
+    gif(anim, "images/dumb_spiral.gif", fps=10)
+
+
+# Optimising the fit
+
+    # data = makeSpiral(phases, n_samples=5000)     
+    function DoGif(data, plot_filename, λ1=0., λ2=0.)
+        cont = DataContainer(data...)
+        X,y = extractArrays(cont)
+        class = LogisticClassifierMultinomial(max_iter=10, λ1=λ1, λ2=λ2)
+        initialiseWeights!(class, cont)
+    
+        tot_iter = 0
+        anim = @animate for n = [fill(1, 20) ; fill(10, 20) ; fill(50, 20) ; fill(200, 20)]
+            for i in 1:n
+                @printagain @show tot_iter
+                fit!(class, X, y)
+                tot_iter += 1
+            end
+            plot(class, X, y, annotate=(1.0,1.0,"iter:$tot_iter"))
+        end 
+        gif(anim, plot_filename, fps=10)
+    end
+
+    DoGif (generic function with 3 methods)
+
+    data = makeCloud(5, n_samples=1000)
+    DoGif(data, "images/mult_cloud.gif")
+    DoGif(data, "images/mult_cloud_l1l2.gif", 0.05, 0.05)
+
+    tot_iter = 0
+    tot_iter = 22
+    tot_iter = 130
+    tot_iter = 252
+    tot_iter = 422
+    tot_iter = 600
+    tot_iter = 770
+    tot_iter = 948
+    tot_iter = 1120
+    tot_iter = 1310
+    tot_iter = 1506
+    tot_iter = 1705
+    tot_iter = 1903
+    tot_iter = 2102
+    tot_iter = 2300
+    tot_iter = 2499
+    tot_iter = 2695
+    tot_iter = 2893
+    tot_iter = 3090
+    tot_iter = 3290
+    tot_iter = 3489
+    tot_iter = 3688
+    tot_iter = 3885
+    tot_iter = 4084
+    tot_iter = 4282
+    tot_iter = 4477
+    tot_iter = 4673
+    tot_iter = 4875
+    tot_iter = 5075
+    ┌ Info: Saved animation to 
+    │   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_cloud.gif
+    └ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
+    tot_iter = 3
+    tot_iter = 40
+    tot_iter = 150
+    tot_iter = 290
+    tot_iter = 470
+    tot_iter = 658
+    tot_iter = 835
+    tot_iter = 1020
+    tot_iter = 1204
+    tot_iter = 1409
+    tot_iter = 1614
+    tot_iter = 1819
+    tot_iter = 2020
+    tot_iter = 2225
+    tot_iter = 2430
+    tot_iter = 2635
+    tot_iter = 2841
+    tot_iter = 3046
+    tot_iter = 3252
+    tot_iter = 3455
+    tot_iter = 3659
+    tot_iter = 3864
+    tot_iter = 4068
+    tot_iter = 4272
+    tot_iter = 4478
+    tot_iter = 4683
+    tot_iter = 4889
+    tot_iter = 5095
+
+![img](./.ob-jupyter/d44c76d36b7135bf7e38ea37cd2c8bef957cc775.png)
+
+    ┌ Info: Saved animation to 
+    │   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_cloud_l1l2.gif
+    └ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
+
+<img src="images/mult_cloud_l1l2.gif" />
+
+    data = makeSpiral(5, n_samples=1000)
+    DoGif(data, "images/mult_spiral.gif")
+    DoGif(data, "images/mult_spiral_l1l2.gif", 0.05, 0.05)
+
+    tot_iter = 3391
+    tot_iter = 3595
+    tot_iter = 3795
+    tot_iter = 3998
+    tot_iter = 4205
+    tot_iter = 4410
+    tot_iter = 4616
+    tot_iter = 4820
+    tot_iter = 5023
+
+![img](./.ob-jupyter/0b1cbd1bc63b07c7639f38042128a587dbc0e9e3.png)
+
+    ┌ Info: Saved animation to 
+    │   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_spiral_l1l2.gif
+    └ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
+
+<img src="images/mult_spiral_l1l2.gif" />
+
+    tot_iter = 4
+    tot_iter = 40
+    tot_iter = 145
+    tot_iter = 270
+    tot_iter = 448
+    tot_iter = 620
+    tot_iter = 798
+    tot_iter = 970
+    tot_iter = 1148
+    tot_iter = 1337
+    tot_iter = 1537
+    tot_iter = 1733
+    tot_iter = 1933
+    tot_iter = 2133
+    tot_iter = 2335
+    tot_iter = 2533
+    tot_iter = 2733
+    tot_iter = 2929
+    tot_iter = 3125
+    tot_iter = 3323
+    tot_iter = 3521
+    tot_iter = 3721
+    tot_iter = 3920
+    tot_iter = 4120
+    tot_iter = 4320
+    tot_iter = 4520
+    tot_iter = 4717
+    tot_iter = 4917
+    tot_iter = 5117
+    ┌ Info: Saved animation to 
+    │   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_spiral.gif
+    └ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
+    tot_iter = 6
+    tot_iter = 50
+    tot_iter = 160
+    tot_iter = 305
+    tot_iter = 480
+    tot_iter = 661
+    tot_iter = 835
+    tot_iter = 1019
+    tot_iter = 1192
+    tot_iter = 1394
+    tot_iter = 1600
+    tot_iter = 1804
+    tot_iter = 2009
+    tot_iter = 2213
+    tot_iter = 2419
+    tot_iter = 2620
+    tot_iter = 2823
+    tot_iter = 3027
+    tot_iter = 3233
+    tot_iter = 3438
+    tot_iter = 3641
+    tot_iter = 3841
+    tot_iter = 4047
+    tot_iter = 4250
+    tot_iter = 4455
+    tot_iter = 4658
+    tot_iter = 4863
+    tot_iter = 5069
+
+![img](./.ob-jupyter/bff56e0038f4f2cdc650d5d139277a29e8e305ac.png)
+
+    ┌ Info: Saved animation to 
+    │   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_spiral_l1l2.gif
+    └ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
+
+<img src="images/mult_spiral_l1l2.gif" />
+

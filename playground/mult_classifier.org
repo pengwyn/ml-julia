@@ -109,49 +109,9 @@ using LogMult
     gif(anim, "images/dumb_spiral.gif", fps=10)
    #+END_SRC
 
-** Testing zone
+* Optimising the fit
 
    
-   #+BEGIN_SRC jupyter-julia
-     data = makeCloud(5)
-     cont = DataContainer(data...)
-
-     class = LogisticClassifierMultinomial(max_iter=10000)
-     initialiseWeights!(class, cont)
-
-     X,y = extractArrays(cont)
-     y_pred = forwardPass(class, X)
-
-     pred = predict(class,X)
-     tru = oneHotDec(y)
-
-        z = LogMult.calcZ(class, X)
-        y_pred = forwardPass(class, X, z)
-     
-        using MLBase, Data
-logisticDeriv = MLBase.DERIVATIVES[:logistic]
-    δ = ∇y_logLoss(y, y_pred) .* logisticDeriv.(z)
-        ∇ = LogMult.computeLossGrad(class, X, δ)
-        LogMult.updateParams!(class, ∇...)
-     
-
-   #+END_SRC
-
-   #+RESULTS:
-   :RESULTS:
-: 1×5 Array{Float64,2}:
-:  0.221266  0.701143  -0.957529  0.903043  -0.50148
-   :END:
-
-   #+BEGIN_SRC jupyter-julia
-fit!(class, X, y)
-   #+END_SRC
-
-   #+RESULTS:
-   :RESULTS:
-: 1×5 Array{Float64,2}:
-:  -5.23197  -9.80851  0.533336  -6.94848  -5.66991
-   :END:
 
    #+BEGIN_SRC jupyter-julia
      # data = makeSpiral(phases, n_samples=5000)     
@@ -176,219 +136,181 @@ fit!(class, X, y)
 
    #+RESULTS:
    :RESULTS:
-#+BEGIN_EXAMPLE
-tot_iter = 0
-tot_iter = 20
-tot_iter = 122
-tot_iter = 233
-tot_iter = 416
-tot_iter = 587
-tot_iter = 769
-tot_iter = 942
-tot_iter = 1120
-tot_iter = 1310
-tot_iter = 1496
-tot_iter = 1691
-tot_iter = 1894
-tot_iter = 2096
-tot_iter = 2293
-tot_iter = 2487
-tot_iter = 2693
-tot_iter = 2897
-tot_iter = 3095
-tot_iter = 3298
-tot_iter = 3500
-tot_iter = 3702
-tot_iter = 3904
-tot_iter = 4104
-tot_iter = 4304
-tot_iter = 4504
-tot_iter = 4702
-tot_iter = 4889
-tot_iter = 5082
-┌ Info: Saved animation to 
-│   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_cloud.gif
-└ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
-tot_iter = 3
-tot_iter = 26
-tot_iter = 130
-tot_iter = 248
-tot_iter = 420
-tot_iter = 596
-tot_iter = 754
-tot_iter = 920
-tot_iter = 1096
-tot_iter = 1275
-tot_iter = 1470
-tot_iter = 1669
-tot_iter = 1863
-tot_iter = 2056
-tot_iter = 2258
-tot_iter = 2460
-tot_iter = 2665
-tot_iter = 2870
-tot_iter = 3071
-tot_iter = 3278
-tot_iter = 3483
-tot_iter = 3687
-tot_iter = 3893
-tot_iter = 4095
-tot_iter = 4301
-tot_iter = 4507
-tot_iter = 4714
-tot_iter = 4911
-tot_iter = 5098
-#+END_EXAMPLE
-[[file:./.ob-jupyter/812a5b7f0788bce3342921128a1702b4ba6cfe06.png]]
-: ┌ Info: Saved animation to 
-: │   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_spiral.gif
-: └ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
-#+BEGIN_EXPORT html
-<img src="images/mult_spiral.gif" />
-#+END_EXPORT
+: DoGif (generic function with 3 methods)
    :END:
 
    #+BEGIN_SRC jupyter-julia
      data = makeCloud(5, n_samples=1000)
      DoGif(data, "images/mult_cloud.gif")
-     DoGif(data, "images/mult_cloud_l1l2.gif", 0.5, 0.5)
+     DoGif(data, "images/mult_cloud_l1l2.gif", 0.05, 0.05)
 #+END_SRC
 
 #+RESULTS:
 :RESULTS:
 #+BEGIN_EXAMPLE
-tot_iter = 15
-tot_iter = 83
-tot_iter = 181
-tot_iter = 322
-tot_iter = 496
-tot_iter = 670
-tot_iter = 840
-tot_iter = 1010
-tot_iter = 1170
-tot_iter = 1361
-tot_iter = 1556
-tot_iter = 1752
-tot_iter = 1947
-tot_iter = 2127
-tot_iter = 2320
-tot_iter = 2516
-tot_iter = 2708
-tot_iter = 2901
-tot_iter = 3094
-tot_iter = 3287
-tot_iter = 3478
-tot_iter = 3673
-tot_iter = 3869
-tot_iter = 4063
-tot_iter = 4255
-tot_iter = 4447
-tot_iter = 4635
-tot_iter = 4829
-tot_iter = 5023
-┌ Info: Saved animation to 
-│   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_cloud.gif
-└ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
-#+END_EXAMPLE
-# [goto error]
-#+BEGIN_EXAMPLE
-MethodError: no method matching DoGif(::Tuple{Array{Float64,2},Array{Int64,1}}, ::String, ::Float64, ::Float64)
-Closest candidates are:
-  DoGif(::Any, ::Any) at In[47]:3
-
-Stacktrace:
- [1] top-level scope at In[50]:3
 tot_iter = 0
-tot_iter = 18
-tot_iter = 110
-tot_iter = 212
-tot_iter = 376
-tot_iter = 553
-tot_iter = 720
-tot_iter = 897
-tot_iter = 1070
-tot_iter = 1246
-tot_iter = 1441
-tot_iter = 1638
-tot_iter = 1833
-tot_iter = 2020
-tot_iter = 2209
-tot_iter = 2394
-tot_iter = 2584
-tot_iter = 2775
-tot_iter = 2970
-tot_iter = 3160
-tot_iter = 3356
-tot_iter = 3552
-tot_iter = 3750
-tot_iter = 3946
-tot_iter = 4138
-tot_iter = 4325
-tot_iter = 4517
-tot_iter = 4710
-tot_iter = 4904
-tot_iter = 5098
+tot_iter = 22
+tot_iter = 130
+tot_iter = 252
+tot_iter = 422
+tot_iter = 600
+tot_iter = 770
+tot_iter = 948
+tot_iter = 1120
+tot_iter = 1310
+tot_iter = 1506
+tot_iter = 1705
+tot_iter = 1903
+tot_iter = 2102
+tot_iter = 2300
+tot_iter = 2499
+tot_iter = 2695
+tot_iter = 2893
+tot_iter = 3090
+tot_iter = 3290
+tot_iter = 3489
+tot_iter = 3688
+tot_iter = 3885
+tot_iter = 4084
+tot_iter = 4282
+tot_iter = 4477
+tot_iter = 4673
+tot_iter = 4875
+tot_iter = 5075
 ┌ Info: Saved animation to 
 │   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_cloud.gif
 └ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
+tot_iter = 3
+tot_iter = 40
+tot_iter = 150
+tot_iter = 290
+tot_iter = 470
+tot_iter = 658
+tot_iter = 835
+tot_iter = 1020
+tot_iter = 1204
+tot_iter = 1409
+tot_iter = 1614
+tot_iter = 1819
+tot_iter = 2020
+tot_iter = 2225
+tot_iter = 2430
+tot_iter = 2635
+tot_iter = 2841
+tot_iter = 3046
+tot_iter = 3252
+tot_iter = 3455
+tot_iter = 3659
+tot_iter = 3864
+tot_iter = 4068
+tot_iter = 4272
+tot_iter = 4478
+tot_iter = 4683
+tot_iter = 4889
+tot_iter = 5095
 #+END_EXAMPLE
-# [goto error]
-: MethodError: no method matching DoGif(::Tuple{Array{Float64,2},Array{Int64,1}}, ::String, ::Float64, ::Float64)
-: Closest candidates are:
-:   DoGif(::Any, ::Any) at In[47]:3
-: 
-: Stacktrace:
-:  [1] top-level scope at In[51]:3
+[[file:./.ob-jupyter/d44c76d36b7135bf7e38ea37cd2c8bef957cc775.png]]
+: ┌ Info: Saved animation to 
+: │   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_cloud_l1l2.gif
+: └ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
+#+BEGIN_EXPORT html
+<img src="images/mult_cloud_l1l2.gif" />
+#+END_EXPORT
 :END:
 
 #+BEGIN_SRC jupyter-julia
   data = makeSpiral(5, n_samples=1000)
   DoGif(data, "images/mult_spiral.gif")
-  DoGif(data, "images/mult_spiral.gif", 0.5, 0.5)
+  DoGif(data, "images/mult_spiral_l1l2.gif", 0.05, 0.05)
    #+END_SRC
 
    #+RESULTS:
    :RESULTS:
 #+BEGIN_EXAMPLE
-tot_iter = 3
-tot_iter = 30
-tot_iter = 133
-tot_iter = 242
-tot_iter = 416
-tot_iter = 578
-tot_iter = 750
-tot_iter = 920
-tot_iter = 1093
-tot_iter = 1268
-tot_iter = 1460
-tot_iter = 1657
-tot_iter = 1855
-tot_iter = 2051
-tot_iter = 2248
-tot_iter = 2440
-tot_iter = 2636
-tot_iter = 2831
-tot_iter = 3027
-tot_iter = 3222
-tot_iter = 3420
-tot_iter = 3620
-tot_iter = 3820
-tot_iter = 4018
-tot_iter = 4211
-tot_iter = 4403
-tot_iter = 4596
-tot_iter = 4788
-tot_iter = 4981
-tot_iter = 5173
+tot_iter = 3391
+tot_iter = 3595
+tot_iter = 3795
+tot_iter = 3998
+tot_iter = 4205
+tot_iter = 4410
+tot_iter = 4616
+tot_iter = 4820
+tot_iter = 5023
+#+END_EXAMPLE
+[[file:./.ob-jupyter/0b1cbd1bc63b07c7639f38042128a587dbc0e9e3.png]]
+: ┌ Info: Saved animation to 
+: │   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_spiral_l1l2.gif
+: └ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
+#+BEGIN_EXPORT html
+<img src="images/mult_spiral_l1l2.gif" />
+#+END_EXPORT
+#+BEGIN_EXAMPLE
+tot_iter = 4
+tot_iter = 40
+tot_iter = 145
+tot_iter = 270
+tot_iter = 448
+tot_iter = 620
+tot_iter = 798
+tot_iter = 970
+tot_iter = 1148
+tot_iter = 1337
+tot_iter = 1537
+tot_iter = 1733
+tot_iter = 1933
+tot_iter = 2133
+tot_iter = 2335
+tot_iter = 2533
+tot_iter = 2733
+tot_iter = 2929
+tot_iter = 3125
+tot_iter = 3323
+tot_iter = 3521
+tot_iter = 3721
+tot_iter = 3920
+tot_iter = 4120
+tot_iter = 4320
+tot_iter = 4520
+tot_iter = 4717
+tot_iter = 4917
+tot_iter = 5117
 ┌ Info: Saved animation to 
 │   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_spiral.gif
 └ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
+tot_iter = 6
+tot_iter = 50
+tot_iter = 160
+tot_iter = 305
+tot_iter = 480
+tot_iter = 661
+tot_iter = 835
+tot_iter = 1019
+tot_iter = 1192
+tot_iter = 1394
+tot_iter = 1600
+tot_iter = 1804
+tot_iter = 2009
+tot_iter = 2213
+tot_iter = 2419
+tot_iter = 2620
+tot_iter = 2823
+tot_iter = 3027
+tot_iter = 3233
+tot_iter = 3438
+tot_iter = 3641
+tot_iter = 3841
+tot_iter = 4047
+tot_iter = 4250
+tot_iter = 4455
+tot_iter = 4658
+tot_iter = 4863
+tot_iter = 5069
 #+END_EXAMPLE
-# [goto error]
-: MethodError: no method matching DoGif(::Tuple{Array{Float64,2},Array{Int64,1}}, ::String, ::Float64, ::Float64)
-: Closest candidates are:
-:   DoGif(::Any, ::Any) at In[47]:3
-: 
-: Stacktrace:
-:  [1] top-level scope at In[52]:3
+[[file:./.ob-jupyter/bff56e0038f4f2cdc650d5d139277a29e8e305ac.png]]
+: ┌ Info: Saved animation to 
+: │   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_spiral_l1l2.gif
+: └ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
+#+BEGIN_EXPORT html
+<img src="images/mult_spiral_l1l2.gif" />
+#+END_EXPORT
    :END:
