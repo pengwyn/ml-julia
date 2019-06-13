@@ -97,10 +97,14 @@ using RecipesBase
     return (class,X,y)
 end
 
-@recipe function plot(class::ClassifierMixin, X, y_true ; show_lines=false)
+@recipe function plot(class::ClassifierMixin, X, y_true ; show_lines=false, one_hot=true)
     y_pred = forwardPass(class, X)
     pred = predict(class, X)
-    tru = oneHotDec(y_true)
+    if one_hot
+        tru = oneHotDec(y_true)
+    else
+        tru = y_true .+ 1
+    end
     
     matching = correct(tru,pred)
 

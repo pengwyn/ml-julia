@@ -11,6 +11,7 @@ A multinomial classifier
     push!(LOAD_PATH, "../src")
     using Data
     using LogMult
+    using LogBin
 
 
 # A dumb classifier
@@ -123,163 +124,72 @@ A multinomial classifier
     DoGif(data, "images/mult_cloud.gif")
     DoGif(data, "images/mult_cloud_l1l2.gif", 0.05, 0.05)
 
-    tot_iter = 0
-    tot_iter = 22
-    tot_iter = 130
-    tot_iter = 252
-    tot_iter = 422
-    tot_iter = 600
-    tot_iter = 770
-    tot_iter = 948
-    tot_iter = 1120
-    tot_iter = 1310
-    tot_iter = 1506
-    tot_iter = 1705
-    tot_iter = 1903
-    tot_iter = 2102
-    tot_iter = 2300
-    tot_iter = 2499
-    tot_iter = 2695
-    tot_iter = 2893
-    tot_iter = 3090
-    tot_iter = 3290
-    tot_iter = 3489
-    tot_iter = 3688
-    tot_iter = 3885
-    tot_iter = 4084
-    tot_iter = 4282
-    tot_iter = 4477
-    tot_iter = 4673
-    tot_iter = 4875
-    tot_iter = 5075
-    ┌ Info: Saved animation to 
-    │   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_cloud.gif
-    └ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
-    tot_iter = 3
-    tot_iter = 40
-    tot_iter = 150
-    tot_iter = 290
-    tot_iter = 470
-    tot_iter = 658
-    tot_iter = 835
-    tot_iter = 1020
-    tot_iter = 1204
-    tot_iter = 1409
-    tot_iter = 1614
-    tot_iter = 1819
-    tot_iter = 2020
-    tot_iter = 2225
-    tot_iter = 2430
-    tot_iter = 2635
-    tot_iter = 2841
-    tot_iter = 3046
-    tot_iter = 3252
-    tot_iter = 3455
-    tot_iter = 3659
-    tot_iter = 3864
-    tot_iter = 4068
-    tot_iter = 4272
-    tot_iter = 4478
-    tot_iter = 4683
-    tot_iter = 4889
-    tot_iter = 5095
-
-![img](./.ob-jupyter/d44c76d36b7135bf7e38ea37cd2c8bef957cc775.png)
-
-    ┌ Info: Saved animation to 
-    │   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_cloud_l1l2.gif
-    └ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
-
-<img src="images/mult_cloud_l1l2.gif" />
+![img](images/mult_cloud.gif)
+![img](images/mult_cloud_l1l2.gif)
 
     data = makeSpiral(5, n_samples=1000)
     DoGif(data, "images/mult_spiral.gif")
     DoGif(data, "images/mult_spiral_l1l2.gif", 0.05, 0.05)
 
-    tot_iter = 3391
-    tot_iter = 3595
-    tot_iter = 3795
-    tot_iter = 3998
-    tot_iter = 4205
-    tot_iter = 4410
-    tot_iter = 4616
-    tot_iter = 4820
-    tot_iter = 5023
+![img](images/mult_spiral.gif)
+![img](images/mult_spiral_l1l2.gif)
 
-![img](./.ob-jupyter/0b1cbd1bc63b07c7639f38042128a587dbc0e9e3.png)
 
-    ┌ Info: Saved animation to 
-    │   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_spiral_l1l2.gif
-    └ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
+# Comparing binomial vs multinomial
 
-<img src="images/mult_spiral_l1l2.gif" />
+    data = makeCloud(2)
+    cont = DataContainer(data...)
+    
+    cont_bin = DataContainer(data..., conv_one_hot=false)
 
-    tot_iter = 4
-    tot_iter = 40
-    tot_iter = 145
-    tot_iter = 270
-    tot_iter = 448
-    tot_iter = 620
-    tot_iter = 798
-    tot_iter = 970
-    tot_iter = 1148
-    tot_iter = 1337
-    tot_iter = 1537
-    tot_iter = 1733
-    tot_iter = 1933
-    tot_iter = 2133
-    tot_iter = 2335
-    tot_iter = 2533
-    tot_iter = 2733
-    tot_iter = 2929
-    tot_iter = 3125
-    tot_iter = 3323
-    tot_iter = 3521
-    tot_iter = 3721
-    tot_iter = 3920
-    tot_iter = 4120
-    tot_iter = 4320
-    tot_iter = 4520
-    tot_iter = 4717
-    tot_iter = 4917
-    tot_iter = 5117
-    ┌ Info: Saved animation to 
-    │   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_spiral.gif
-    └ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
-    tot_iter = 6
-    tot_iter = 50
-    tot_iter = 160
-    tot_iter = 305
-    tot_iter = 480
-    tot_iter = 661
-    tot_iter = 835
-    tot_iter = 1019
-    tot_iter = 1192
-    tot_iter = 1394
-    tot_iter = 1600
-    tot_iter = 1804
-    tot_iter = 2009
-    tot_iter = 2213
-    tot_iter = 2419
-    tot_iter = 2620
-    tot_iter = 2823
-    tot_iter = 3027
-    tot_iter = 3233
-    tot_iter = 3438
-    tot_iter = 3641
-    tot_iter = 3841
-    tot_iter = 4047
-    tot_iter = 4250
-    tot_iter = 4455
-    tot_iter = 4658
-    tot_iter = 4863
-    tot_iter = 5069
+    DataContainer(100×3 DataFrames.DataFrame
+    │ Row │ X1         │ X2         │ y1    │
+    │     │ Float64    │ Float64    │ Int64 │
+    ├─────┼────────────┼────────────┼───────┤
+    │ 1   │ 0.247473   │ -0.0506048 │ 1     │
+    │ 2   │ -0.29922   │ -0.144338  │ 0     │
+    │ 3   │ 0.0595783  │ 0.0524481  │ 1     │
+    │ 4   │ -0.200843  │ -0.143531  │ 0     │
+    │ 5   │ 0.0656673  │ 0.0827589  │ 1     │
+    │ 6   │ 0.080063   │ 0.0829596  │ 1     │
+    │ 7   │ -0.196635  │ -0.095874  │ 0     │
+    │ 8   │ 0.292486   │ 0.115077   │ 1     │
+    │ 9   │ -0.325655  │ -0.271717  │ 0     │
+    │ 10  │ 0.243591   │ -0.0365232 │ 1     │
+    ⋮
+    │ 90  │ -0.289541  │ -0.226703  │ 0     │
+    │ 91  │ 0.0565176  │ 0.0524375  │ 1     │
+    │ 92  │ 0.0178673  │ 0.0907     │ 1     │
+    │ 93  │ -0.287518  │ -0.0975342 │ 0     │
+    │ 94  │ -0.0909624 │ -0.12126   │ 0     │
+    │ 95  │ 0.17355    │ -0.216218  │ 1     │
+    │ 96  │ -0.339632  │ -0.200565  │ 0     │
+    │ 97  │ 0.154941   │ 0.175327   │ 1     │
+    │ 98  │ -0.208294  │ -0.0695392 │ 0     │
+    │ 99  │ -0.2617    │ -0.183241  │ 0     │
+    │ 100 │ 0.114297   │ 0.0425646  │ 1     │, 100, 2, Symbol[:X1, :X2], 1, Symbol[], true, Array{Float64,1}[[1.0, 1.0], [0.0, 0.0]])
 
-![img](./.ob-jupyter/bff56e0038f4f2cdc650d5d139277a29e8e305ac.png)
+    class = LogisticClassifierMultinomial(max_iter=10000)
+    initialiseWeights!(class, cont)
+    
+    X,y = extractArrays(cont)
+    
+    fit!(class, X, y)
+    
+    plot(class, X, y)
 
-    ┌ Info: Saved animation to 
-    │   fn = /home/pengwyn/work5/ml-julia/playground/images/mult_spiral_l1l2.gif
-    └ @ Plots /home/pengwyn/.julia/packages/Plots/oiirH/src/animation.jl:90
+![img](images/bm_comp_mult.png)
 
-<img src="images/mult_spiral_l1l2.gif" />
+    class = LogisticClassifierBinary(max_iter=10000)
+    
+    # plot(class, cont)
+    X,y = extractArrays(cont_bin)
+    
+    initialiseWeights!(class, X)
+    
+    fit!(class, X, y)
+    
+    plot(class, X, y, one_hot=false)
+
+![img](images/bm_comp_bin.png)
 

@@ -31,11 +31,15 @@ function predict(self::LogisticClassifierBinary, X)
     # I'm guessing n_targets needs to be 2 for now, until we introduce one_hot stuff.
     y = forwardPass(self, X)
     
-    labels = ifelse.(y .< 0.5, 0, 1)
+    # labels = ifelse.(y .< 0.5, 0, 1)
+    labels = ifelse.(y .< 0.5, 1, 2)
 end
 
 import MLBase: lossFunc
 function lossFunc(self::LogisticClassifierBinary, X, y_true)
+    @assert all(==(1), size(y_true)[2:end])
+    y_true = vec(y_true)
+
     y_pred = forwardPass(self, X)
     binaryLogLoss(y_true, y_pred)
 end
@@ -62,6 +66,8 @@ end
 const logisticDeriv = MLBase.DERIVATIVES[:logistic]
 import MLBase: fit!
 function fit!(self::LogisticClassifierBinary, X, y_true)
+    @assert all(==(1), size(y_true)[2:end])
+    y_true = vec(y_true)
 
     optimal_loss = Inf
     optimal_w = nothing

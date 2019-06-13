@@ -160,7 +160,7 @@ Base.@kwdef mutable struct DataContainer
     scales = [ones(n_features), zeros(n_features)]
 end
 
-function DataContainer(data_features, data_targets, shuffle_data=true, conv_one_hot=true)
+function DataContainer(data_features, data_targets ; shuffle_data=true, conv_one_hot=true)
     @argcheck size(data_features, 1) == size(data_targets, 1)
 
     if conv_one_hot
